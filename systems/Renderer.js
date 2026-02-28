@@ -10,13 +10,15 @@ export class Renderer {
 
         for (let r = 0; r < SIZE; r++) {
             for (let c = 0; c < SIZE; c++) {
-
                 const d = document.createElement("div");
                 d.className = "cell";
 
-                d.addEventListener("mousedown", (e) => {
-                    onCellMouseDown(e, r, c); // 🔥 selected 제거
-                });
+                d.addEventListener("pointerdown", (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    onCellMouseDown(e, r, c);
+                }, { passive: false });
+
+                d.addEventListener("dragstart", (e) => e.preventDefault());
 
                 this.boardEl.appendChild(d);
             }
