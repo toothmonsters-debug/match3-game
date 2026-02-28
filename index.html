@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Match3 Refactored</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="gameWrap">
+		<div id="boardWrap">
+			<div id="ui-stage">STAGE <span id="stage">1</span></div>
+			<div id="ui-score">점수: <span id="score">0</span></div>
+			<div id="ui-target">목표점수: <span id="target">10000</span></div>
+			<div id="comboLog"></div>
+			<div id="ui-time">남은시간: <span id="time">60</span>초</div>
+			<div id="effectLayer"></div>
+
+			<!-- ✅ 추가 -->
+			<div id="stageBanner"></div>
+			<div id="countdown"></div>
+
+			<div id="gameOverOverlay">
+				<div class="go-title">GAME OVER</div>
+				<div class="go-score"></div>
+			</div>
+
+			<div id="board"></div>
+			<!-- 초기에는 "시작"으로 보여야 함 -->
+			<button id="restart">시작</button>
+		</div>
+		<div id="shopPanel">
+			<div class="shop-header">POINT: <span id="pointValue">0</span></div>
+
+			<div class="shop-grid">
+				<div class="shop-item" data-upg="baseScore">
+					<div class="shop-title">[Lv. <span class="lv">0</span>] 블럭 보너스</div>
+					<div class="shop-desc">+50 / 레벨</div>
+					<div class="shop-preview">현재: <span class="preview">100</span></div>
+					<div class="shop-price">가격: <span class="price">1</span> P</div>
+				</div>
+
+				<div class="shop-item" data-upg="comboScore">
+					<div class="shop-title">[Lv. <span class="lv">0</span>] 콤보 보너스</div>
+					<div class="shop-desc">+15 / 레벨</div>
+					<div class="shop-preview">현재: <span class="preview">0</span></div>
+					<div class="shop-price">가격: <span class="price">1</span> P</div>
+				</div>
+
+				<div class="shop-item" data-upg="timeBonus">
+					<div class="shop-title">[Lv. <span class="lv">0</span>] 시간 증가</div>
+					<div class="shop-desc">+2초 / 레벨</div>
+					<div class="shop-preview">현재: <span class="preview">60</span>s</div>
+					<div class="shop-price">가격: <span class="price">1</span> P</div>
+				</div>
+
+				<div class="shop-item" data-upg="bombScore">
+					<div class="shop-title">[Lv. <span class="lv">0</span>] 폭탄 보너스</div>
+					<div class="shop-desc">+300 / 레벨</div>
+					<div class="shop-preview">현재: <span class="preview">100</span></div>
+					<div class="shop-price">가격: <span class="price">1</span> P</div>
+				</div>
+
+				<div class="shop-item" data-upg="crossScore">
+					<div class="shop-title">[Lv. <span class="lv">0</span>] 십자 보너스</div>
+					<div class="shop-desc">+300 / 레벨</div>
+					<div class="shop-preview">현재: <span class="preview">100</span></div>
+					<div class="shop-price">가격: <span class="price">1</span> P</div>
+				</div>
+			</div>
+
+		</div>
+		<div id="soundPanel">
+			<div class="sound-row">
+				🔊 Master
+				<input id="masterVol" type="range" min="0" max="1" step="0.01" value="1">
+			</div>
+
+			<div class="sound-row">
+				🎵 BGM
+				<input id="bgmVol" type="range" min="0" max="1" step="0.01" value="0.7">
+			</div>
+
+			<button id="muteBtn">🔊</button>
+			<div id="gameGuide">
+				<div>🟦 네방향으로 드래그해서 3개 이상 연결</div>
+				<div>💥 4개 이상은 특수 블럭 생성</div>
+				<div>⏱ 제한 시간 안에 목표 점수 달성</div>
+			</div>
+		</div>
+
+	</div>
+
+
+
+	<script type="module" src="./main.js"></script>
+</body>
+</html>
