@@ -16,12 +16,28 @@ export class InputController {
         this.getScore = getScore;
         this.setScore = setScore;
         this.onAfterResolve = onAfterResolve;
+
+        this._scrollLockHandler = (ev) => {
+            if (ev.cancelable) ev.preventDefault();
+        };
     }
 
-    // 모바일/브라우저 리페인트 문제 방지:
-    // body fixed 방식 스크롤 락을 사용하지 않음
-    _lockPageScroll() { }
-    _unlockPageScroll() { }
+    // body fixed는 사용하지 않고, 드래그 중 기본 스크롤만 차단
+    _lockPageScroll() {
+        document.documentElement.classList.add("board-drag-lock");
+        document.body.classList.add("board-drag-lock");
+
+        document.addEventListener("touchmove", this._scrollLockHandler, { passive: false });
+        document.addEventListener("wheel", this._scrollLockHandler, { passive: false });
+    }
+
+    _unlockPageScroll() {
+        document.documentElement.classList.remove("board-drag-lock");
+        document.body.classList.remove("board-drag-lock");
+
+        document.removeEventListener("touchmove", this._scrollLockHandler);
+        document.removeEventListener("wheel", this._scrollLockHandler);
+    }
 
     _getClientPoint(ev) {
         if (ev.touches && ev.touches.length > 0) {
@@ -91,7 +107,7 @@ export class InputController {
                 }
             }
         };
-        
+
         const onUp = async (ev) => {
             if (pointerId !== null && ev.pointerId !== pointerId) return;
 
