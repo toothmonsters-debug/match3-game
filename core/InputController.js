@@ -16,6 +16,34 @@ export class InputController {
         this.getScore = getScore;
         this.setScore = setScore;
         this.onAfterResolve = onAfterResolve;
+
+        this._lockedScrollY = 0;
+    }
+
+    _lockPageScroll() {
+        this._lockedScrollY = window.scrollY || window.pageYOffset || 0;
+
+        document.documentElement.classList.add("board-drag-lock");
+        document.body.classList.add("board-drag-lock");
+
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${this._lockedScrollY}px`;
+        document.body.style.left = "0";
+        document.body.style.right = "0";
+        document.body.style.width = "100%";
+    }
+
+    _unlockPageScroll() {
+        document.documentElement.classList.remove("board-drag-lock");
+        document.body.classList.remove("board-drag-lock");
+
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+
+        window.scrollTo(0, this._lockedScrollY);
     }
 
     _getClientPoint(ev) {
@@ -26,17 +54,6 @@ export class InputController {
             return { x: ev.changedTouches[0].clientX, y: ev.changedTouches[0].clientY };
         }
         return { x: ev.clientX, y: ev.clientY };
-    }
-
-    _getStepPx() {
-        const boardEl = this.boardCtrl?.boardEl;
-        if (!boardEl || boardEl.children.length < 2) return STEP;
-
-        const first = boardEl.children[0].getBoundingClientRect();
-        const second = boardEl.children[1].getBoundingClientRect();
-        const step = Math.abs(second.left - first.left);
-
-        return step > 0 ? step : STEP;
     }
 
     onMouseDown(e, r, c) {
@@ -53,13 +70,19 @@ export class InputController {
         const startDiv = e.currentTarget;
         startDiv.classList.add("selected");
 
+        // ✅ 드래그 시작 시 스크롤 잠금
+        this._lockPageScroll();
+
+        if (pointerId !== null && startDiv.setPointerCapture) {
+            startDiv.setPointerCapture(pointerId);
+        }
+
         const board = this.boardCtrl.getBoardModel().get();
         const startCell = board[r][c];
 
         const startPt = this._getClientPoint(e);
         const startX = startPt.x;
         const startY = startPt.y;
-        const stepPx = this._getStepPx();
 
         let axis = null;
         let lastSteps = 0;
@@ -81,7 +104,7 @@ export class InputController {
             }
 
             const delta = axis === "h" ? dx : dy;
-            const steps = Math.round(delta / stepPx);
+            const steps = Math.round(delta / STEP);
 
             if (steps !== lastSteps) {
                 lastSteps = steps;
@@ -100,11 +123,18 @@ export class InputController {
             document.removeEventListener(upEventName, onUp);
             if (cancelEventName) document.removeEventListener(cancelEventName, onUp);
 
+            if (pointerId !== null && startDiv.releasePointerCapture) {
+                try { startDiv.releasePointerCapture(pointerId); } catch (err) { }
+            }
+
+            // ✅ 드래그 종료 시 스크롤 해제
+            this._unlockPageScroll();
+
             startDiv.classList.remove("selected");
 
             const pt = this._getClientPoint(ev);
             const delta = axis === "h" ? (pt.x - startX) : (pt.y - startY);
-            const steps = axis ? Math.round(delta / stepPx) : 0;
+            const steps = axis ? Math.round(delta / STEP) : 0;
 
             let finalR = r;
             let finalC = c;

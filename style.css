@@ -622,4 +622,11 @@ body {
     }
 }
 
+html.board-drag-lock,
+body.board-drag-lock {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    touch-action: none;
+}
+
 
