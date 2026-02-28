@@ -6,8 +6,8 @@ export class InputController {
         boardCtrl,
         getState,
         setBusy,
-        getScore,    // ✅ 추가
-        setScore,    // ✅ 추가
+        getScore,
+        setScore,
         onAfterResolve
     }) {
         this.boardCtrl = boardCtrl;
@@ -16,35 +16,12 @@ export class InputController {
         this.getScore = getScore;
         this.setScore = setScore;
         this.onAfterResolve = onAfterResolve;
-
-        this._lockedScrollY = 0;
     }
 
-    _lockPageScroll() {
-        this._lockedScrollY = window.scrollY || window.pageYOffset || 0;
-
-        document.documentElement.classList.add("board-drag-lock");
-        document.body.classList.add("board-drag-lock");
-
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${this._lockedScrollY}px`;
-        document.body.style.left = "0";
-        document.body.style.right = "0";
-        document.body.style.width = "100%";
-    }
-
-    _unlockPageScroll() {
-        document.documentElement.classList.remove("board-drag-lock");
-        document.body.classList.remove("board-drag-lock");
-
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.width = "";
-
-        window.scrollTo(0, this._lockedScrollY);
-    }
+    // 모바일/브라우저 리페인트 문제 방지:
+    // body fixed 방식 스크롤 락을 사용하지 않음
+    _lockPageScroll() { }
+    _unlockPageScroll() { }
 
     _getClientPoint(ev) {
         if (ev.touches && ev.touches.length > 0) {
@@ -70,7 +47,6 @@ export class InputController {
         const startDiv = e.currentTarget;
         startDiv.classList.add("selected");
 
-        // ✅ 드래그 시작 시 스크롤 잠금
         this._lockPageScroll();
 
         if (pointerId !== null && startDiv.setPointerCapture) {
@@ -115,7 +91,7 @@ export class InputController {
                 }
             }
         };
-
+        
         const onUp = async (ev) => {
             if (pointerId !== null && ev.pointerId !== pointerId) return;
 
@@ -127,7 +103,6 @@ export class InputController {
                 try { startDiv.releasePointerCapture(pointerId); } catch (err) { }
             }
 
-            // ✅ 드래그 종료 시 스크롤 해제
             this._unlockPageScroll();
 
             startDiv.classList.remove("selected");
