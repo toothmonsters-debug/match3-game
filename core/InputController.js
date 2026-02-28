@@ -28,6 +28,17 @@ export class InputController {
         return { x: ev.clientX, y: ev.clientY };
     }
 
+    _getStepPx() {
+        const boardEl = this.boardCtrl?.boardEl;
+        if (!boardEl || boardEl.children.length < 2) return STEP;
+
+        const first = boardEl.children[0].getBoundingClientRect();
+        const second = boardEl.children[1].getBoundingClientRect();
+        const step = Math.abs(second.left - first.left);
+
+        return step > 0 ? step : STEP;
+    }
+
     onMouseDown(e, r, c) {
         const { isGameOver, started } = this.getState();
         if (isGameOver || !started) return;
@@ -48,6 +59,7 @@ export class InputController {
         const startPt = this._getClientPoint(e);
         const startX = startPt.x;
         const startY = startPt.y;
+        const stepPx = this._getStepPx();
 
         let axis = null;
         let lastSteps = 0;
@@ -69,7 +81,7 @@ export class InputController {
             }
 
             const delta = axis === "h" ? dx : dy;
-            const steps = Math.round(delta / STEP);
+            const steps = Math.round(delta / stepPx);
 
             if (steps !== lastSteps) {
                 lastSteps = steps;
@@ -92,7 +104,7 @@ export class InputController {
 
             const pt = this._getClientPoint(ev);
             const delta = axis === "h" ? (pt.x - startX) : (pt.y - startY);
-            const steps = axis ? Math.round(delta / STEP) : 0;
+            const steps = axis ? Math.round(delta / stepPx) : 0;
 
             let finalR = r;
             let finalC = c;
