@@ -29,8 +29,8 @@ export class InputController {
     }
 
     onMouseDown(e, r, c) {
-        const { isGameOver, started, isBusy } = this.getState();
-        if (isGameOver || !started || isBusy) return;
+        const { isGameOver, started } = this.getState();
+        if (isGameOver || !started) return;
 
         if (e.cancelable) e.preventDefault();
 
@@ -105,10 +105,14 @@ export class InputController {
             if (!axis) {
                 if (startCell && startCell.special) {
                     this.setBusy(true);
-                    const scoreRef = { value: this.getScore() };
-                    await this.boardCtrl.triggerAt(r, c, scoreRef);
-                    this.setScore(scoreRef.value);
-                    this.setBusy(false);
+                    try {
+                        const scoreRef = { value: this.getScore() };
+                        await this.boardCtrl.triggerAt(r, c, scoreRef);
+                        this.setScore(scoreRef.value);
+                    } finally {
+                        this.setBusy(false);
+                    }
+
                     if (this.onAfterResolve) this.onAfterResolve();
                 } else {
                     this.boardCtrl.render();
@@ -118,28 +122,30 @@ export class InputController {
 
             if (steps !== 0) {
                 this.setBusy(true);
-                this.boardCtrl.commitInsertShift(r, c, axis, steps);
+                try {
+                    this.boardCtrl.commitInsertShift(r, c, axis, steps);
 
-                const finalIdx = finalR * SIZE + finalC;
-                const finalDiv = this.boardCtrl.boardEl.children[finalIdx];
-                if (finalDiv) {
-                    finalDiv.classList.add("release");
-                    setTimeout(() => finalDiv.classList.remove("release"), 220);
+                    const finalIdx = finalR * SIZE + finalC;
+                    const finalDiv = this.boardCtrl.boardEl.children[finalIdx];
+                    if (finalDiv) {
+                        finalDiv.classList.add("release");
+                        setTimeout(() => finalDiv.classList.remove("release"), 220);
+                    }
+
+                    if (startCell && startCell.special) {
+                        const scoreRef = { value: this.getScore() };
+                        await this.boardCtrl.triggerAt(finalR, finalC, scoreRef);
+                        this.setScore(scoreRef.value);
+                    } else {
+                        const scoreRef = { value: this.getScore() };
+                        await this.boardCtrl.resolveBoard(scoreRef, { r: finalR, c: finalC });
+                        this.setScore(scoreRef.value);
+                    }
+                } finally {
+                    this.setBusy(false);
                 }
 
-                if (startCell && startCell.special) {
-                    const scoreRef = { value: this.getScore() };
-                    await this.boardCtrl.triggerAt(finalR, finalC, scoreRef);
-                    this.setScore(scoreRef.value);
-                    this.setBusy(false);
-                    if (this.onAfterResolve) this.onAfterResolve();
-                } else {
-                    const scoreRef = { value: this.getScore() };
-                    await this.boardCtrl.resolveBoard(scoreRef, { r: finalR, c: finalC });
-                    this.setScore(scoreRef.value);
-                    this.setBusy(false);
-                    if (this.onAfterResolve) this.onAfterResolve();
-                }
+                if (this.onAfterResolve) this.onAfterResolve();
             } else {
                 this.boardCtrl.render();
             }
@@ -152,4 +158,3 @@ export class InputController {
         }
     }
 }
-        
