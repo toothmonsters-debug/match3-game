@@ -27,48 +27,43 @@ export class Renderer {
 
 
     updateCellDiv(div, cell) {
-        // 폭발 중인 셀은 렌더에서 건드리지 않음
-      
-      //  div.style.transform = "";
         div.style.opacity = "1";
-      //  div.classList.remove("selected");
+        div.classList.remove("bomb", "cross", "explode");
 
-        div.innerHTML = "";
+        let content = div.firstElementChild;
+        if (!content) {
+            content = document.createElement("div");
+            div.appendChild(content);
+        }
 
         if (!cell) {
             div.style.visibility = "hidden";
+            content.className = "";
+            content.textContent = "";
             return;
         }
 
         div.style.visibility = "visible";
-        div.classList.remove("bomb", "cross", "explode");
 
         if (cell.special === "bomb") {
             div.style.setProperty("--block-color", "#000");
             div.classList.add("bomb");
+            content.className = "icon";
+            content.textContent = "💣";
+            return;
+        }
 
-            const ic = document.createElement("div");
-            ic.className = "icon";         
-            ic.textContent = "💣";
-            div.appendChild(ic);
-
-        } else if (cell.special === "cross") {
+        if (cell.special === "cross") {
             div.style.setProperty("--block-color", "#000");
             div.classList.add("cross");
-
-            const ic = document.createElement("div");
-            ic.className = "icon";
-            ic.textContent = "➕";
-            div.appendChild(ic);
-
-        } else {
-            div.style.background = COLORS[cell.color];
-
-            const ic = document.createElement("div");
-            ic.className = "block-symbol";
-            ic.textContent = ICONS[cell.color];
-            div.appendChild(ic);
+            content.className = "icon";
+            content.textContent = "➕";
+            return;
         }
+
+        div.style.background = COLORS[cell.color];
+        content.className = "block-symbol";
+        content.textContent = ICONS[cell.color];
     }
 
   render(board) {

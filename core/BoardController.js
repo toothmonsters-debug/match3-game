@@ -6,6 +6,11 @@ import { Matcher } from "../systems/Matcher.js";
 import { SpecialResolver } from "../systems/SpecialResolver.js";
 import { Board } from "../systems/Board.js";
 
+const DEBUG = false;
+const dbg = (...args) => {
+    if (DEBUG) console.log(...args);
+};
+
 export class BoardController {
     constructor({ boardEl, renderer, upgrades, onScoreChange, onComboPopup, onStageCheck }) {
         this.boardEl = boardEl;
@@ -57,12 +62,13 @@ export class BoardController {
     }
 
     showFloat(r, c, text) {
+        if (this.boardEl.querySelectorAll(".floatText").length > 80) return;
+
         const d = document.createElement("div");
         d.className = "floatText";
         d.textContent = text;
         d.style.left = (c * 50 + 10) + "px";
         d.style.top = (r * 50 + 10) + "px";
-
         d.style.transform = "translateY(0px)";
         d.style.opacity = "1";
 
@@ -94,7 +100,7 @@ export class BoardController {
 
         const activationTriggers = isSpecialActivation ? [[r, c]] : [];
 
-        console.log("[triggerAt] isSpecialActivation:", isSpecialActivation, "triggers:", activationTriggers);
+        dbg("[triggerAt] isSpecialActivation:", isSpecialActivation, "triggers:", activationTriggers);
 
         const gain = await this.removeCells([[r, c]], 3, scoreRef, {
             isSpecialActivation,
