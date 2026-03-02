@@ -1,47 +1,44 @@
+:root {
+    --cell-size: 50px;
+    --cell-gap: 4px;
+    --board-pad: 8px;
+    --board-top-ui-space: 90px;
+    --board-width: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
+}
+
 body {
     font-family: sans-serif;
     color: #eee;
     display: flex;
     justify-content: center;
     padding: 20px;
-    background: radial-gradient(circle at center, #2b2f55 0%, #1a1c33 40%, #121320 70%, #0b0c14 100%), repeating-linear-gradient( 45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px );
-}
-#board::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: 16px;
-    background: linear-gradient(45deg, rgba(255,255,255,0.08), transparent 40%);
-    pointer-events: none;
+    background: radial-gradient(circle at center, #2b2f55 0%, #1a1c33 40%, #121320 70%, #0b0c14 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px);
 }
 
 /* 전체 래퍼 */
 #gameWrap {
     display: flex;
-    flex-direction: row; /* 가로 배치 */
+    flex-direction: row;
     align-items: flex-start;
     gap: 24px;
     margin-top: 45px;
 }
 
-
 /* 보드 + UI 기준 컨테이너 */
 #boardWrap {
     position: relative;
-    width: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
-    padding-top: 90px; /* 🔽 위쪽 UI 공간 약간 증가 */
-  
+    width: var(--board-width);
+    padding-top: var(--board-top-ui-space);
 }
 
-/* ===== 개별 UI 배치 ===== */
-
+/* ===== 개별 UI ===== */
 #ui-stage {
     position: absolute;
     top: 0;
     left: 50%;
     color: #ffd166;
     transform: translateX(-50%);
-    font-size: 27px; /* 🔼 스테이지 크게 */
+    font-size: 27px;
     font-weight: 900;
 }
 
@@ -49,7 +46,7 @@ body {
     position: absolute;
     top: 30px;
     left: 0;
-    font-size: 21px; /* 🔼 점수 크게 */
+    font-size: 21px;
     font-weight: 900;
 }
 
@@ -57,19 +54,19 @@ body {
     position: absolute;
     top: 30px;
     right: 0;
-    font-size: 21px; /* 그대로 유지 */
+    font-size: 21px;
 }
 
 #ui-time {
     position: absolute;
     top: 60px;
     right: 0;
-    font-size: 18px; /* 그대로 유지 */
+    font-size: 18px;
 }
 
 #comboLog {
     position: absolute;
-    z-index: 10; /* 콤보는 보드 위 레이어 */
+    z-index: 10;
     top: 72px;
     left: 0;
     right: 0;
@@ -86,107 +83,8 @@ body {
     white-space: nowrap;
     overflow: hidden;
 }
-#shopPanel {
-    width: 360px;
-    height: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)) + 90px);
-    padding: 12px;
-    background: #0e0e0e;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(255, 200, 100, 0.15);
-    display: grid;
-    grid-template-rows: auto 1fr; /* 🔴 헤더 / 나머지 */
-    gap: 12px;
-    box-sizing: border-box;
-}
-
-/* 실제 아이템 그리드 */
-.shop-grid {
-    height: 100%;
-    display: flex;
-    flex-direction: column; /* 세로로 쌓고 */
-    flex-wrap: wrap; /* 넘치면 옆 컬럼으로 */
-    align-content: flex-start;
-    gap: 12px;
-    overflow: hidden; /* 스크롤 없음 */
-}
-
-
-.shop-header {
-    font-weight: 900;
-    font-size: 20px;
-    margin-bottom: 6px;
-    text-align: center;
-    color: #ffd166;
-    text-shadow: 0 0 6px #000;
-}
-
-.shop-item {
-    width: 160px; /* 🔴 이게 컬럼 폭 */
-    height: 110px; /* 🔴 이게 카드 높이 */
-    box-sizing: border-box;
-    background: linear-gradient(180deg, #1a1a1a, #111);
-    border-radius: 12px;
-    padding: 10px 12px;
-    cursor: pointer;
-    border: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-
-    .shop-item:hover {
-        transform: translateY(-2px);
-        border-color: #ffd166;
-        box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
-    }
-
-    .shop-item:active {
-        transform: translateY(0);
-    }
-
-.shop-title {
-    font-weight: 900;
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 2px;
-}
-
-.shop-desc {
-    font-size: 12px;
-    color: #aaa;
-    margin-bottom: 2px;
-}
-
-.shop-preview {
-    font-size: 13px;
-    color: #7bdff2;
-}
-
-
-.shop-price {
-    background: #000;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 13px;
-    text-align: right;
-    color: #ffd166;
-    box-shadow: inset 0 0 6px rgba(255,209,102,0.2);
-}
-.shop-item.disabled {
-    opacity: 0.4;
-    filter: grayscale(0.7);
-    box-shadow: none !important;
-    border-color: #333 !important;
-    cursor: not-allowed;
-}
-
-
-
 
 /* ===== 보드 ===== */
-
-
 #board {
     position: relative;
     z-index: 1;
@@ -196,59 +94,22 @@ body {
     gap: var(--cell-gap);
     padding: var(--board-pad);
     border-radius: 14px;
-    background: linear-gradient( 180deg, #1c1f3d, #15172c );
+    background: linear-gradient(180deg, #1c1f3d, #15172c);
     box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
     backdrop-filter: blur(4px);
     user-select: none;
 }
 
-/* ===== 리스타트 버튼 ===== */
-
-/* 기본: 버튼을 보이게 변경 (초기 화면에서 '시작'이 보이도록) */
-#restart {
-    margin-top: 14px;
-    width: 100%;
-    padding: 14px 0;
-    font-size: 20px;
-    font-weight: 900;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(180deg, #ff6b6b, #c92a2a);
-    color: #fff;
-    box-shadow: 0 0 12px rgba(255, 80, 80, 0.5);
-    text-shadow: 0 0 6px rgba(0,0,0,0.6);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
-    opacity: 1;
-    pointer-events: auto;
-    position: relative;
-    z-index: 1001; /* 오버레이(z-index:30)보다 위로 */
-}
-
-    #restart:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 20px rgba(255, 80, 80, 0.8);
-    }
-
-    #restart:active {
-        transform: translateY(0);
-    }
-
-/* 게임오버일 때도 보이게 */
-#gameWrap.gameover #restart {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* 게임 진행 중에는 숨김 (Game.start / restart에서 .playing 추가) */
-#gameWrap.playing #restart {
-    opacity: 0;
+#board::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.08), transparent 40%);
     pointer-events: none;
 }
 
-
 /* ===== 셀 ===== */
-
 .cell {
     width: var(--cell-size);
     height: var(--cell-size);
@@ -261,141 +122,69 @@ body {
     overflow: hidden;
     transition: transform 0.08s ease;
     will-change: transform;
-    background: radial-gradient( ellipse 12% 12% at 23% 18%, /* 🔥 가로로 긴 타원 */
-    rgba(255,255,255,0.2) 50%,
-    rgba(255,255,255,0.1) 1%, /* 여기까지는 또렷 */
-    rgba(255,255,255,0.0) 100% /* 바로 컷 */
-    ), var(--block-color);
+    background: radial-gradient(ellipse 12% 12% at 23% 18%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 1%, rgba(255,255,255,0.0) 100%), var(--block-color);
 }
 
-    .cell.bomb {
-        background: #000 !important;
-        outline: 3px solid #c28888;
-        color: #ff0;
-        animation: glowPulse 1.2s infinite ease-in-out;
-    }
-
-    .cell.cross {
-         background: #000 !important;
-        outline: 3px solid #ffd166;
-        color: #0ff;
-        animation: glowPulse 1.2s infinite ease-in-out;
-    }
-
-    .cell.explode {
-        transform: translate(var(--ox, 0px), var(--oy, 0px)) scale(1.5);
-        opacity: 0;
-    }
-    .cell .icon {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 40px;
-        transform: translateY(-3px); /* 🔥 위로 2px */
-    }
-    .cell .block-symbol {
-        font-size: 35px;
-        font-weight: 600;
-        color: rgba(255,255,255,0.1); /* 🔥 여기서 톤 조절 */
-        transform: translateY(-3px);
-        pointer-events: none;
-       text-shadow: 0 0 6px rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0);
-    }
-    .cell.selected {
-        transform: scale(0.9, 1.1);
-        z-index: 2;
-    }
-    .cell.release {
-        animation: jellyRelease 0.22s ease;
-    }
-
-@keyframes jellyRelease {
-    0% {
-        transform: scale(0.9,1.1);
-    }
-
-    50% {
-        transform: scale(1.06,0.94);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-    .cell.pop {
-        opacity: 0;
-        transform: translate(var(--ox), var(--oy)) scale(1.4);
-    }
-@keyframes glowPulse {
-    0% {
-        box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5);
-    }
-
-    50% {
-        box-shadow: 0 0 14px #ff0, 0 0 32px rgba(255,255,0,0.9);
-    }
-
-    100% {
-        box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5);
-    }
+.cell.bomb {
+    background: #000 !important;
+    outline: 3px solid #c28888;
+    color: #ff0;
+    animation: glowPulse 1.2s infinite ease-in-out;
 }
 
-/* ===== 아이콘 ===== */
+.cell.cross {
+    background: #000 !important;
+    outline: 3px solid #ffd166;
+    color: #0ff;
+    animation: glowPulse 1.2s infinite ease-in-out;
+}
 
-.icon {
+.cell.explode {
+    transform: translate(var(--ox, 0px), var(--oy, 0px)) scale(1.5);
+    opacity: 0;
+}
+
+.cell.selected {
+    transform: scale(0.9, 1.1);
+    z-index: 2;
+}
+
+.cell.release {
+    animation: jellyRelease 0.22s ease;
+}
+
+.cell .icon {
     position: absolute;
-    font-size: 22px;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    transform: translateY(-3px);
+}
+
+.cell .block-symbol {
+    font-size: 35px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.1);
+    transform: translateY(-3px);
     pointer-events: none;
-}
-#gameGuide {
-    margin-top: 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.75);
+    text-shadow: 0 0 6px rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0);
 }
 
-    #gameGuide div {
-        margin-bottom: 4px;
-    }
-/* ===== 블록 점수 팝업 ===== */
-
-.floatText {
+.cell .block-image {
     position: absolute;
-    color: #fff;
-    font-weight: 900;
-    font-size: 22px;
-    text-shadow: 0 0 4px #000, 0 0 8px #000;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     pointer-events: none;
-    transition: all 1s ease;
-}
-#board.shake {
-    animation: shake 0.2s infinite;
-}
-
-@keyframes shake {
-    0% {
-        transform: translate(0, 0);
-    }
-
-    25% {
-        transform: translate(-2px, 0);
-    }
-
-    50% {
-        transform: translate(2px, 0);
-    }
-
-    75% {
-        transform: translate(0, -2px);
-    }
-
-    100% {
-        transform: translate(0, 2px);
-    }
+    user-select: none;
+    -webkit-user-drag: none;
+    z-index: 1;
 }
 
+/* ===== 게임오버/카운트다운 ===== */
 #countdown {
     position: absolute;
     top: 50%;
@@ -411,9 +200,9 @@ body {
     transition: opacity 0.2s;
 }
 
-    #countdown.show {
-        opacity: 1;
-    }
+#countdown.show {
+    opacity: 1;
+}
 
 #gameOverOverlay {
     position: absolute;
@@ -429,25 +218,27 @@ body {
     transition: opacity 0.3s;
 }
 
-    #gameOverOverlay.show {
-        opacity: 1;
-    }
+#gameOverOverlay.show {
+    opacity: 1;
+}
 
-    #gameOverOverlay .go-title {
-        font-size: 64px;
-        font-weight: 900;
-        color: #ff5555;
-        text-shadow: 0 0 12px rgba(255,0,0,0.7);
-        margin-bottom: 12px;
-    }
+#gameOverOverlay .go-title {
+    font-size: clamp(34px, calc(var(--board-width) * 0.12), 64px);
+    font-weight: 900;
+    color: #ff5555;
+    text-shadow: 0 0 12px rgba(255,0,0,0.7);
+    margin-bottom: 12px;
+    white-space: nowrap;   /* 두 줄 방지 */
+    line-height: 1;
+}
 
-    #gameOverOverlay .go-score {
-        font-size: 28px;
-        font-weight: 700;
-        color: #fff;
-    }
+#gameOverOverlay .go-score {
+    font-size: clamp(18px, calc(var(--board-width) * 0.05), 28px);
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
 
-/* Game over 최대 콤보 표기 */
 #gameOverOverlay .go-maxcombo {
     margin-top: 8px;
     font-size: 20px;
@@ -461,31 +252,245 @@ body {
     display: block;
 }
 
-.cell.gameover-explode {
-    animation: goExplode 0.25s ease forwards;
+/* ===== 상점 오버레이 ===== */
+#shopOpenBtn {
+    position: absolute;
+    left: 50%;
+    top: 66%;
+    transform: translateX(-50%);
+    z-index: 35;
+    display: none;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    background: linear-gradient(180deg, #ffd166, #d9a62f);
+    color: #2b1d00;
+    box-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+    line-height: 1.15;
+    text-align: center;
 }
 
-@keyframes goExplode {
-    from {
-        transform: scale(1) translateY(0);
-        opacity: 1;
-    }
-
-    to {
-        transform: scale(0.3) rotate(20deg) translateY(20px);
-        opacity: 0;
-    }
+#shopOpenBtn small {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #3a2a00;
 }
+
+#shopOpenBtn.show {
+    display: inline-block;
+}
+
+#shopOverlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--board-top-ui-space);
+    height: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
+    z-index: 45;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+#shopOverlay.show {
+    display: flex;
+}
+
+#shopPanel {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: calc(100% - 56px);  /* 오버레이 기준 비율 높이 */
+    min-height: 0;
+    padding: 10px;
+    background: #0e0e0e;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 200, 100, 0.2);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.shop-header {
+    font-weight: 900;
+    font-size: 20px;
+    margin-bottom: 6px;
+    text-align: center;
+    color: #ffd166;
+    text-shadow: 0 0 6px #000;
+}
+
+/* 상점 카드 구조: 
+   1행 업그레이드 이름
+   2행 레벨당 증가폭 | 현재값
+   3행 가격
+*/
+.shop-grid {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr); /* 행 높이 균등 분배 */
+    gap: 8px;
+    align-content: stretch;
+    overflow: hidden; /* 스크롤 없이 비율 축소 */
+}
+
+/* ===== Shop visual tuning (readability boost) ===== */
+.shop-item {
+    background: linear-gradient(180deg, #202020, #111);
+    border: 1px solid #3b3b3b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.shop-item:hover {
+    border-color: #ffd166;
+    box-shadow:
+        0 0 10px rgba(255, 209, 102, 0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.shop-title {
+    grid-area: title;
+    min-width: 0;
+    font-weight: 900;
+    font-size: clamp(11px, 1.9vw, 15px);
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.55), 0 0 4px rgba(255,255,255,0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shop-desc {
+    grid-area: desc;
+    min-width: 0;
+    font-weight: 700;
+    font-size: clamp(10px, 1.6vw, 12px);
+    color: #c6c6c6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shop-preview {
+    grid-area: preview;
+    min-width: 0;
+    font-weight: 800;
+    font-size: clamp(10px, 1.7vw, 13px);
+    color: #8fe9ff;
+    text-align: right;
+    text-shadow: 0 0 5px rgba(123,223,242,0.25);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shop-price {
+    grid-area: price;
+    min-width: 0;
+    background: linear-gradient(180deg, #0d0d0d, #050505);
+    border: 1px solid #2f2a1a;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-weight: 900;
+    font-size: clamp(10px, 1.7vw, 13px);
+    text-align: right;
+    color: #ffd166;
+    text-shadow: 0 0 6px rgba(255,209,102,0.35);
+    box-shadow: inset 0 0 8px rgba(255,209,102,0.12);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+    margin-left:5px;
+    margin-right:5px;
+}
+
+/* ===== 사운드 패널 ===== */
+#soundPanel {
+    margin-top: 5px;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 12px;
+    background: #111;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+.sound-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    font-size: 14px;
+}
+
+.sound-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+#muteBtn {
+    width: 52px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* ===== 기타 ===== */
+#gameGuide {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+}
+
+#gameGuide div {
+    margin-bottom: 4px;
+}
+
+.floatText {
+    position: absolute;
+    color: #fff;
+    font-weight: 900;
+    font-size: 22px;
+    text-shadow: 0 0 4px #000, 0 0 8px #000;
+    pointer-events: none;
+    transition: all 1s ease;
+}
+
+#board.shake {
+    animation: shake 0.2s infinite;
+}
+
 #effectLayer {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 50; /* 보드 위 */
+    z-index: 50;
 }
 
 #stageBanner {
     position: absolute;
-    z-index: 20; /* UI/보드 위 */
+    z-index: 20;
     top: 10px;
     left: 50%;
     transform: translateX(-50%) translateY(-10px);
@@ -503,36 +508,44 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
-#soundPanel {
+/* 리스타트 버튼 */
+#restart {
     margin-top: 14px;
-    padding: 12px;
-    background: #111;
+    width: 100%;
+    padding: 14px 0;
+    font-size: 20px;
+    font-weight: 900;
     border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 0 10px rgba(255,255,255,0.05);
-}
-
-.sound-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-}
-
-    .sound-row input {
-        width: 160px;
-    }
-
-#muteBtn {
-    padding: 8px 0;
-    border-radius: 8px;
     border: none;
-    background: #222;
-    color: #fff;
     cursor: pointer;
-    font-size: 16px;
+    background: linear-gradient(180deg, #ff6b6b, #c92a2a);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 80, 80, 0.5);
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1001;
+}
+
+#restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 80, 80, 0.8);
+}
+
+#restart:active {
+    transform: translateY(0);
+}
+
+#gameWrap.gameover #restart {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#gameWrap.playing #restart {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #board,
@@ -542,86 +555,6 @@ body {
     user-select: none;
 }
 
-:root {
-    --cell-size: 50px;
-    --cell-gap: 4px;
-    --board-pad: 8px;
-}
-
-/* 태블릿 */
-@media (max-width: 1024px) {
-    :root {
-        --cell-size: clamp(42px, 5.2vw, 48px);
-        --cell-gap: 4px;
-        --board-pad: 8px;
-    }
-
-    body {
-        padding: 10px;
-    }
-
-    #gameWrap {
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
-        margin-top: 10px;
-    }
-
-    #shopPanel,
-    #soundPanel {
-        width: min(440px, calc(100vw - 20px));
-    }
-
-    #shopPanel {
-        height: auto;
-    }
-
-    .shop-grid {
-        height: auto;
-        max-height: 300px;
-        overflow-y: auto;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .shop-item {
-        width: calc(50% - 5px);
-    }
-}
-
-/* 모바일 */
-@media (max-width: 600px) {
-    :root {
-        --cell-size: clamp(34px, 10.6vw, 42px);
-        --cell-gap: 3px;
-        --board-pad: 6px;
-    }
-
-    #boardWrap {
-        padding-top: 74px;
-    }
-
-    #ui-stage { font-size: 20px; }
-    #ui-score, #ui-target { top: 26px; font-size: 15px; }
-    #ui-time { top: 48px; font-size: 14px; }
-    #comboLog { top: 58px; font-size: 22px; }
-
-    #restart {
-        font-size: 17px;
-        padding: 12px 0;
-    }
-
-    .cell .icon { font-size: 30px; }
-    .cell .block-symbol { font-size: 26px; }
-
-    .shop-item {
-        width: 100%;
-        height: auto;
-        min-height: 92px;
-    }
-}
-
 html.board-drag-lock,
 body.board-drag-lock {
     overflow: hidden !important;
@@ -629,25 +562,89 @@ body.board-drag-lock {
     touch-action: none;
 }
 
-.cell .block-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    z-index: 1;
+/* ===== 애니메이션 ===== */
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5); }
+    50% { box-shadow: 0 0 14px #ff0, 0 0 32px rgba(255,255,0,0.9); }
+    100% { box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5); }
 }
 
-.cell.move-origin {
-    outline: 3px solid rgba(255, 220, 130, 1);
-    outline-offset: 3px;
-    box-shadow:
-        0 0 12px rgba(255, 220, 130, 1),
-        0 0 24px rgba(255, 180, 80, 0.9);
+@keyframes jellyRelease {
+    0% { transform: scale(0.9,1.1); }
+    50% { transform: scale(1.06,0.94); }
+    100% { transform: scale(1); }
 }
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, 0); }
+    50% { transform: translate(2px, 0); }
+    75% { transform: translate(0, -2px); }
+    100% { transform: translate(0, 2px); }
+}
+
+@keyframes goExplode {
+    from {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.3) rotate(20deg) translateY(20px);
+        opacity: 0;
+    }
+}
+
+.cell.gameover-explode {
+    animation: goExplode 0.25s ease forwards;
+}
+
+/* 텍스트 좌우 여백 */
+.shop-title,
+.shop-desc,
+.shop-preview,
+.shop-price {
+    padding-left: 8px;
+    padding-right: 10px;
+}
+
+/* disabled 카드: 회색톤 + 텍스트 대비 유지 */
+.shop-item.disabled {
+    background: linear-gradient(180deg, #1a1a1a, #121212) !important;
+    border-color: #4a4a4a !important;
+    filter: grayscale(0.55);
+    opacity: 0.72;
+    box-shadow: none !important;
+}
+
+/* disabled 상태에서도 텍스트는 읽히게 유지 */
+.shop-item.disabled .shop-title {
+    color: #e6e6e6 !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-desc {
+    color: #b8b8b8 !important;
+}
+
+.shop-item.disabled .shop-preview {
+    color: #c9d7dd !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-price {
+    color: #d8d8d8 !important;
+    border-color: #555 !important;
+    background: linear-gradient(180deg, #171717, #101010) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+
+
+
+
+
+
+
 
 
 

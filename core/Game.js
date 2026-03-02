@@ -12,7 +12,6 @@ import {
     playBgm,
     stopBgm,
     setMasterVolume,
-    setBgmVolume,
     toggleMute
 } from "../audio/Sfx.js";
 
@@ -26,6 +25,7 @@ export class Game {
         // 상태 플래그
         this.started = false;
         this.isPreparingStart = false;
+        this.isShopOpen = false;
 
         // DOM
         this.boardEl = document.getElementById("board");
@@ -116,23 +116,33 @@ export class Game {
             }
         });
 
-        this.initBoard();
-        this.syncStats();
-        this.updateHUD();
+        this.ui.bindShopOpen(() => {
+            if (!this.isGameOver) return;
+            this.isShopOpen = true;
+            this.ui.openShopOverlay();
+        });
 
-        const masterSlider = document.getElementById("masterVol");
-        const bgmSlider = document.getElementById("bgmVol");
+        this.ui.bindShopClose(() => {
+            this.isShopOpen = false;
+            this.ui.closeShopOverlay();
+        });
+
+        this.ui.closeShopOverlay();
+        this.ui.hideShopOpenButton();
+
+        // ======================
+        // 🔊 Sound Controls
+        // ======================
+
+        const soundSlider = document.getElementById("soundVol");
         const muteBtn = document.getElementById("muteBtn");
 
-        if (masterSlider) {
-            masterSlider.addEventListener("input", e => {
-                setMasterVolume(parseFloat(e.target.value));
-            });
-        }
-
-        if (bgmSlider) {
-            bgmSlider.addEventListener("input", e => {
-                setBgmVolume(parseFloat(e.target.value));
+        if (soundSlider) {
+            setMasterVolume(parseFloat(soundSlider.value)); // 초기값 동기화
+            soundSlider.addEventListener("input", e => {
+                const v = parseFloat(e.target.value);
+                setMasterVolume(v);
+               
             });
         }
 
@@ -142,6 +152,13 @@ export class Game {
                 muteBtn.textContent = muted ? "🔇" : "🔊";
             });
         }
+
+        this.initBoard();
+        this.syncStats();
+        this.updateHUD();
+        
+        // constructor 안, 상태값 추가
+        this.lastGainedPoints = 0;
     }
 
     async _playStartCountdown() {
@@ -186,6 +203,11 @@ export class Game {
             this.stageRequirement = this.baseStageScore;
             this.targetScore = this.stageRequirement;
             this.updateHUD();
+
+            // start() 안, await this._playStartCountdown(); 직전에 추가 (안전장치)
+            if (!this.boardEl.children.length) {
+                this.initBoard();
+            }
 
             await this._playStartCountdown();
 
@@ -286,6 +308,7 @@ export class Game {
         await sleep(200);
 
         const gainedPoints = Math.floor(this.score / 10000);
+        this.lastGainedPoints = gainedPoints;
         this.upgrades.addPoints(gainedPoints);
         const maxCombo = this.boardCtrl.getMaxCombo ? this.boardCtrl.getMaxCombo() : 0;
 
@@ -306,6 +329,7 @@ export class Game {
         this.ui.updatePoints(this.upgrades.points);
         this.ui.refreshShop(this.upgrades);
         this.ui.showGameOver(this.score, gainedPoints, maxCombo);
+        this.ui.showShopOpenButton(this.lastGainedPoints);
         this.ui.setRestartLabel("다시 시작");
     }
 

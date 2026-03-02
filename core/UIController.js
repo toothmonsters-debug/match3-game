@@ -13,6 +13,9 @@ export class UIController {
         this.gameOverScoreEl = this.gameOverOverlayEl
             ? this.gameOverOverlayEl.querySelector(".go-score")
             : null;
+        this.shopOpenBtn = document.getElementById("shopOpenBtn");
+        this.shopCloseBtn = document.getElementById("shopCloseBtn");
+        this.shopOverlayEl = document.getElementById("shopOverlay");
 
         this._stageBannerTimer = null;
     }
@@ -207,5 +210,34 @@ export class UIController {
         this.updatePoints(upgrades.points);
     }
 
+    bindShopOpen(handler) {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.onclick = handler;
+    }
 
+    bindShopClose(handler) {
+        if (!this.shopCloseBtn) return;
+        this.shopCloseBtn.onclick = handler;
+    }
+
+    showShopOpenButton(gainedPoints) {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.innerHTML = `상점 열기<br><small>획득포인트 : ${gainedPoints}</small>`;
+        this.shopOpenBtn.classList.add("show");
+    }
+
+    hideShopOpenButton() {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.classList.remove("show");
+    }
+
+    openShopOverlay() {
+        if (!this.shopOverlayEl) return;
+        this.shopOverlayEl.classList.add("show");
+    }
+
+    closeShopOverlay() {
+        if (!this.shopOverlayEl) return;
+        this.shopOverlayEl.classList.remove("show");
+    }
 }
