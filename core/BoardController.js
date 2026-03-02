@@ -1,4 +1,4 @@
-import { SIZE, STEP, COLORS } from "../data/Config.js";
+import { SIZE, COLORS } from "../data/Config.js";
 import { sleep, clamp } from "../util/Utils.js";
 import { playSfx } from "../audio/Sfx.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";

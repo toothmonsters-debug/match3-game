@@ -22,7 +22,6 @@ export class InputController {
         };
     }
 
-    // body fixed는 사용하지 않고, 드래그 중 기본 스크롤만 차단
     _lockPageScroll() {
         document.documentElement.classList.add("board-drag-lock");
         document.body.classList.add("board-drag-lock");
@@ -61,7 +60,6 @@ export class InputController {
         const cancelEventName = pointerId !== null ? "pointercancel" : null;
 
         const startDiv = e.currentTarget;
-        startDiv.classList.add("selected");
 
         this._lockPageScroll();
 
@@ -120,8 +118,6 @@ export class InputController {
             }
 
             this._unlockPageScroll();
-
-            startDiv.classList.remove("selected");
 
             const pt = this._getClientPoint(ev);
             const delta = axis === "h" ? (pt.x - startX) : (pt.y - startY);
