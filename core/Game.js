@@ -486,12 +486,28 @@ export class Game {
 
         this.saveProgress();
 
+        this.ui.showComboTitleAtGameOver(maxCombo);
         this.ui.showGameTitleOnly();
+        const c = Math.max(0, Number(maxCombo) || 0);
+
+        let fireworkDurationMs;
+        let fireworkIntensity;
+
+        if (c >= 99) {
+            fireworkDurationMs = 5000;
+            fireworkIntensity = 3;
+        } else {
+            const t = c / 99; // 0~1
+            fireworkDurationMs = Math.round(1000 + 2000 * t); // 1s ~ 3s
+            fireworkIntensity = 1 + 0.75 * t; // 1x ~ 1.75x
+        }
+
+        this.ui.playTitleFireworks(fireworkDurationMs, fireworkIntensity);
     }
 
     checkStageProgress() {
         if (this.score < this.targetScore) return;
-
+        playSfx("stage");
         this.stage++;
         this.stageRequirement = Math.floor(this.stageRequirement * this.stageGrowth);
         this.stageRequirement = Math.round(this.stageRequirement / 1000) * 1000;

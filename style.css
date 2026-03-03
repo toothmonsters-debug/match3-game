@@ -962,7 +962,9 @@ body.board-drag-lock {
 }
 
 #startGuideOverlay.title-only .guide-title {
-    top: -3%;
+    top: 0%;
+    transform: translateX(-50%) scale(var(--go-title-scale, 1));
+    transform-origin: center top;
 }
 
 /* 시작 가이드(제목 포함) 페이드아웃 */

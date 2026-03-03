@@ -27,6 +27,102 @@ export class UIController {
 
         this._stageBannerTimer = null;
         this._startGuideFadeTimer = null;
+        this._titleFxTimers = [];
+    }
+
+    _setGuideTitle(line1Text, line2Text) {
+        if (!this.startGuideEl) return;
+        const line1 = this.startGuideEl.querySelector(".guide-title .line1");
+        const line2 = this.startGuideEl.querySelector(".guide-title .line2");
+        if (line1) line1.textContent = line1Text;
+        if (line2) line2.textContent = line2Text;
+    }
+
+    _setGuideTitleScale(scale = 1) {
+        if (!this.startGuideEl) return;
+        const s = Math.max(0.5, Math.min(1, Number(scale) || 1));
+        this.startGuideEl.style.setProperty("--go-title-scale", s.toFixed(3));
+    }
+
+    resetGuideTitleDefault() {
+        if (!this.startGuideEl) return;
+        const line1 = this.startGuideEl.querySelector(".guide-title .line1");
+        const line2 = this.startGuideEl.querySelector(".guide-title .line2");
+
+        if (line1) {
+            line1.innerHTML = `<span class="num99">99</span>콤보를`;
+        }
+        if (line2) {
+            line2.textContent = "하고싶어!!";
+        }
+
+        this._setGuideTitleScale(1);
+    }
+
+    showComboTitleAtGameOver(combo) {
+        const c = Math.max(0, Number(combo) || 0);
+        const line1Text = `<span class="num99">${c}</span>콤보를`;
+        const line2Text = c >= 100 ? "달성했다!!" : "해버렸다!!";
+
+        if (!this.startGuideEl) return;
+        const line1 = this.startGuideEl.querySelector(".guide-title .line1");
+        const line2 = this.startGuideEl.querySelector(".guide-title .line2");
+
+        if (line1) line1.innerHTML = line1Text;
+        if (line2) line2.textContent = line2Text;
+
+        const t = Math.min(99, c) / 99;
+        const scale = 0.5 + 0.5 * t;
+        this._setGuideTitleScale(scale);
+    }
+
+    playTitleFireworks(durationMs = 2000, intensity = 1) {
+        if (!this.startGuideEl) return;
+
+        this._titleFxTimers.forEach((id) => clearTimeout(id));
+        this._titleFxTimers = [];
+
+        const endAt = Date.now() + Math.max(300, durationMs);
+        const power = Math.max(1, Number(intensity) || 1);
+        const colors = ["#ffd166", "#ff6b6b", "#7bdff2", "#c8ff6b", "#c77dff"];
+
+        const spawn = () => {
+            if (!this.startGuideEl || Date.now() >= endAt) return;
+
+            const fx = document.createElement("div");
+            const size = (7 + Math.random() * 10) * (0.9 + power * 0.25);
+            fx.style.position = "absolute";
+            fx.style.left = `${10 + Math.random() * 80}%`;
+            fx.style.top = `${8 + Math.random() * 50}%`;
+            fx.style.width = `${size}px`;
+            fx.style.height = `${size}px`;
+            fx.style.borderRadius = "50%";
+            fx.style.pointerEvents = "none";
+            fx.style.zIndex = "995";
+            fx.style.background = colors[Math.floor(Math.random() * colors.length)];
+            fx.style.boxShadow = "0 0 10px rgba(255,255,255,0.6)";
+            fx.style.transform = "scale(0.2)";
+            fx.style.opacity = "1";
+            fx.style.transition = "transform 0.9s ease-out, opacity 0.9s ease-out";
+
+            this.startGuideEl.appendChild(fx);
+
+            requestAnimationFrame(() => {
+                const dx = (Math.random() * 2 - 1) * (100 + power * 35);
+                const dy = (Math.random() * 2 - 1) * (85 + power * 30);
+                fx.style.transform = `translate(${dx}px, ${dy}px) scale(${1.4 + power * 0.45})`;
+                fx.style.opacity = "0";
+            });
+
+            const rm = setTimeout(() => fx.remove(), 920);
+            this._titleFxTimers.push(rm);
+
+            const nextDelay = Math.max(28, 110 - Math.floor((power - 1) * 28));
+            const next = setTimeout(spawn, nextDelay);
+            this._titleFxTimers.push(next);
+        };
+
+        spawn();
     }
 
     _formatComma(value) {
@@ -277,6 +373,7 @@ export class UIController {
 
     showStartGuide() {
         if (!this.startGuideEl) return;
+        this.resetGuideTitleDefault();
         this.startGuideEl.classList.remove("title-only");
         this.startGuideEl.classList.add("show");
     }
