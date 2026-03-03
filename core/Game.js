@@ -195,6 +195,12 @@ export class Game {
         try {
             this.started = false;
             this.isGameOver = false;
+
+            // ✅ 추가: 상점 UI 강제 초기화
+            this.isShopOpen = false;
+            this.ui.closeShopOverlay();
+            this.ui.hideShopOpenButton();
+
             this.ui.hideGameOver();
             document.getElementById("gameWrap").classList.remove("gameover");
 
@@ -204,7 +210,6 @@ export class Game {
             this.targetScore = this.stageRequirement;
             this.updateHUD();
 
-            // start() 안, await this._playStartCountdown(); 직전에 추가 (안전장치)
             if (!this.boardEl.children.length) {
                 this.initBoard();
             }
@@ -228,6 +233,12 @@ export class Game {
         try {
             this.started = false;
             this.isGameOver = false;
+
+            // ✅ 추가: 상점 UI 강제 초기화
+            this.isShopOpen = false;
+            this.ui.closeShopOverlay();
+            this.ui.hideShopOpenButton();
+
             this.ui.hideGameOver();
 
             document.getElementById("gameWrap").classList.remove("gameover");

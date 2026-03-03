@@ -1,9 +1,22 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     --cell-size: 50px;
     --cell-gap: 4px;
     --board-pad: 8px;
     --board-top-ui-space: 90px;
     --board-width: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
+    --hud-height: clamp(84px, calc(var(--cell-size) * 1.9), 104px);
+    --hud-scale: calc(var(--cell-size) / 50);
+}
+
+html,
+body {
+    overflow-x: hidden;
 }
 
 body {
@@ -12,7 +25,18 @@ body {
     display: flex;
     justify-content: center;
     padding: 20px;
-    background: radial-gradient(circle at center, #2b2f55 0%, #1a1c33 40%, #121320 70%, #0b0c14 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px);
+    margin: 0;
+    height: 100dvh;     /* min-height -> height */
+    overflow: hidden;   /* 세로 스크롤바 차단 */
+    background:
+        radial-gradient(circle at center, #2b2f55 0%, #1a1c33 40%, #121320 70%, #0b0c14 100%),
+        repeating-linear-gradient(
+            45deg,
+            rgba(255,255,255,0.02),
+            rgba(255,255,255,0.02) 2px,
+            transparent 2px,
+            transparent 6px
+        );
 }
 
 /* 전체 래퍼 */
@@ -28,52 +52,96 @@ body {
 #boardWrap {
     position: relative;
     width: var(--board-width);
-    padding-top: var(--board-top-ui-space);
+    padding-top: calc(var(--hud-height) + 8px);
 }
 
-/* ===== 개별 UI ===== */
-#ui-stage {
+/* ===== HUD 패널 ===== */
+#hudPanel {
     position: absolute;
     top: 0;
-    left: 50%;
-    color: #ffd166;
-    transform: translateX(-50%);
-    font-size: 27px;
+    left: 0;
+    right: 0;
+    height: var(--hud-height);
+    z-index: 12;
+    border-radius: 12px;
+    padding: clamp(6px, calc(var(--cell-size) * 0.18), 10px) 12px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(20,22,40,0.92), rgba(13,14,28,0.92));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "stage stage"
+        "score target"
+        ". time";
+    row-gap: 4px;
+    column-gap: 8px;
+    align-content: center;
+}
+
+#ui-stage,
+#ui-score,
+#ui-target,
+#ui-time {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin: 0;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+}
+
+#ui-stage {
+    grid-area: stage;
+    justify-self: center;
+    font-size: clamp(18px, calc(27px * var(--hud-scale)), 27px); /* 기본크기 유지 */
     font-weight: 900;
+    color: #f8d23d;
+    text-shadow: 0 0 6px #000;
+
+    transform: scale(1.5);            /* 실제 표시만 2배 */
+    transform-origin: center top;   /* 위 기준 확대 */
+    line-height: 1;
 }
 
 #ui-score {
-    position: absolute;
-    top: 30px;
-    left: 0;
-    font-size: 21px;
-    font-weight: 900;
+    grid-area: score;
+    justify-self: start;
+    font-size: clamp(12px, calc(21px * var(--hud-scale)), 21px);
+    font-weight: 800;
+    transform: translateY(+8px);
 }
 
 #ui-target {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    font-size: 21px;
+    grid-area: target;
+    justify-self: end;
+    font-size: clamp(12px, calc(21px * var(--hud-scale)), 21px);
+    transform: translateY(+8px);
 }
 
 #ui-time {
-    position: absolute;
-    top: 60px;
-    right: 0;
-    font-size: 18px;
+    grid-area: time;
+    justify-self: end;
+    font-size: clamp(11px, calc(18px * var(--hud-scale)), 18px);
+    transform: translateY(+8px);
 }
 
+/* 콤보 */
 #comboLog {
     position: absolute;
-    z-index: 10;
-    top: 72px;
+    z-index: 22;
+    top: calc(var(--hud-height) + 6px);
     left: 0;
     right: 0;
     text-align: center;
-    height: 28px;
-    line-height: 28px;
-    font-size: 32px;
+    min-height: 34px;
+    line-height: 1.2;
+    font-size: clamp(20px, 3.2vw, 32px);
     font-weight: 900;
     color: #ffd166;
     text-shadow: 0 0 6px #000;
@@ -81,7 +149,7 @@ body {
     opacity: 0;
     pointer-events: none;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ===== 보드 ===== */
@@ -228,7 +296,7 @@ body {
     color: #ff5555;
     text-shadow: 0 0 12px rgba(255,0,0,0.7);
     margin-bottom: 12px;
-    white-space: nowrap;   /* 두 줄 방지 */
+    white-space: nowrap;
     line-height: 1;
 }
 
@@ -306,7 +374,7 @@ body {
 #shopPanel {
     width: calc(100% - 10px);
     max-width: calc(100% - 10px);
-    height: calc(100% - 56px);  /* 오버레이 기준 비율 높이 */
+    height: calc(100% - 56px);
     min-height: 0;
     padding: 10px;
     background: #0e0e0e;
@@ -327,23 +395,17 @@ body {
     text-shadow: 0 0 6px #000;
 }
 
-/* 상점 카드 구조: 
-   1행 업그레이드 이름
-   2행 레벨당 증가폭 | 현재값
-   3행 가격
-*/
 .shop-grid {
     height: 100%;
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: minmax(0, 1fr); /* 행 높이 균등 분배 */
+    grid-auto-rows: minmax(0, 1fr);
     gap: 8px;
     align-content: stretch;
-    overflow: hidden; /* 스크롤 없이 비율 축소 */
+    overflow: hidden;
 }
 
-/* ===== Shop visual tuning (readability boost) ===== */
 .shop-item {
     background: linear-gradient(180deg, #202020, #111);
     border: 1px solid #3b3b3b;
@@ -368,6 +430,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-left: 8px;
 }
 
 .shop-desc {
@@ -379,6 +442,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-left: 8px;
 }
 
 .shop-preview {
@@ -392,6 +456,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-right: 8px;
 }
 
 .shop-price {
@@ -411,8 +476,49 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: 2px;
-    margin-left:5px;
-    margin-right:5px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.shop-item.disabled {
+    background: linear-gradient(180deg, #1a1a1a, #121212) !important;
+    border-color: #4a4a4a !important;
+    filter: grayscale(0.55);
+    opacity: 0.72;
+    box-shadow: none !important;
+}
+
+.shop-item.disabled .shop-title {
+    color: #e6e6e6 !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-desc {
+    color: #b8b8b8 !important;
+}
+
+.shop-item.disabled .shop-preview {
+    color: #c9d7dd !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-price {
+    color: #d8d8d8 !important;
+    border-color: #555 !important;
+    background: linear-gradient(180deg, #171717, #101010) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+#shopCloseBtn {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    background: #2a2a2a;
+    color: #fff;
 }
 
 /* ===== 사운드 패널 ===== */
@@ -562,6 +668,24 @@ body.board-drag-lock {
     touch-action: none;
 }
 
+/* ===== 스크롤/상하 이동 완전 차단 ===== */
+@media (max-width: 600px) {
+    html,
+    body {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden !important;
+        overscroll-behavior-y: none;
+        touch-action: none;
+    }
+
+    #gameWrap {
+        height: 100dvh;
+        overflow: hidden;
+        margin-top: 0; /* 작은 화면에서 위 여백으로 인한 스크롤 방지 */
+    }
+}
+
 /* ===== 애니메이션 ===== */
 @keyframes glowPulse {
     0% { box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5); }
@@ -598,45 +722,72 @@ body.board-drag-lock {
     animation: goExplode 0.25s ease forwards;
 }
 
-/* 텍스트 좌우 여백 */
-.shop-title,
-.shop-desc,
-.shop-preview,
-.shop-price {
-    padding-left: 8px;
-    padding-right: 10px;
+/* 반응형 */
+@media (max-width: 1024px) {
+    body {
+        padding: 10px;
+    }
+
+    #gameWrap {
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-top: 10px;
+    }
 }
 
-/* disabled 카드: 회색톤 + 텍스트 대비 유지 */
-.shop-item.disabled {
-    background: linear-gradient(180deg, #1a1a1a, #121212) !important;
-    border-color: #4a4a4a !important;
-    filter: grayscale(0.55);
-    opacity: 0.72;
-    box-shadow: none !important;
+@media (max-width: 600px) {
+    :root {
+        --cell-gap: 3px;
+        --board-pad: 6px;
+        --board-top-ui-space: 74px;
+        --cell-size: min(
+            42px,
+            calc((100vw - 16px - (2 * var(--board-pad)) - (7 * var(--cell-gap))) / 8)
+        );
+        /* --hud-height는 root의 clamp 계산값 사용 (여기서 재정의하지 않음) */
+    }
+
+    html, body {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden !important;
+        overscroll-behavior-y: none;
+        touch-action: none;
+    }
+
+    body { padding: 8px; }
+
+    #gameWrap {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden;
+        margin-top: 0;
+        gap: 10px;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    #boardWrap {
+        width: min(var(--board-width), calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+    }
+
+    #comboLog {
+        top: calc(var(--hud-height) + 4px);
+        min-height: 28px;
+        font-size: clamp(16px, 5.2vw, 22px);
+    }
+
+    #restart {
+        font-size: 17px;
+        padding: 12px 0;
+    }
+
+    .cell .icon { font-size: 30px; }
+    .cell .block-symbol { font-size: 26px; }
 }
 
-/* disabled 상태에서도 텍스트는 읽히게 유지 */
-.shop-item.disabled .shop-title {
-    color: #e6e6e6 !important;
-    text-shadow: none !important;
-}
-
-.shop-item.disabled .shop-desc {
-    color: #b8b8b8 !important;
-}
-
-.shop-item.disabled .shop-preview {
-    color: #c9d7dd !important;
-    text-shadow: none !important;
-}
-
-.shop-item.disabled .shop-price {
-    color: #d8d8d8 !important;
-    border-color: #555 !important;
-    background: linear-gradient(180deg, #171717, #101010) !important;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04) !important;
-}
 
 
 
