@@ -18,6 +18,13 @@ export class UIController {
         this.shopOverlayEl = document.getElementById("shopOverlay");
         this.startGuideEl = document.getElementById("startGuideOverlay");
 
+        // ✅ 콤보 유지시간 바
+        this.comboTimerWrapEl = document.getElementById("comboTimerWrap");
+        this.comboTimerBarEl = document.getElementById("comboTimerBar");
+        this._comboTimerRaf = null;
+        this._comboTimerDurationMs = 0;
+        this._comboTimerEndAt = 0;
+
         this._stageBannerTimer = null;
         this._startGuideFadeTimer = null;
     }
@@ -256,6 +263,11 @@ export class UIController {
     openShopOverlay() {
         if (!this.shopOverlayEl) return;
         this.shopOverlayEl.classList.add("show");
+
+        // ✅ 상점을 연 이후에는 획득포인트 라벨 제거
+        if (this.shopOpenBtn) {
+            this.shopOpenBtn.textContent = "상점 열기";
+        }
     }
 
     closeShopOverlay() {
@@ -298,5 +310,59 @@ export class UIController {
             this.hideStartGuide();
             this.startGuideEl.classList.remove("fade-out");
         }, durationMs);
+    }
+
+    startComboTimer(durationMs) {
+        if (!this.comboTimerWrapEl || !this.comboTimerBarEl) return;
+
+        const ms = Math.max(1, Number(durationMs) || 0);
+
+        if (this._comboTimerRaf) {
+            cancelAnimationFrame(this._comboTimerRaf);
+            this._comboTimerRaf = null;
+        }
+
+        this._comboTimerDurationMs = ms;
+        this._comboTimerEndAt = performance.now() + ms;
+
+        this.comboTimerWrapEl.classList.add("show");
+        this.comboTimerWrapEl.style.opacity = "1";
+        this.comboTimerBarEl.style.width = "100%";
+
+        const tick = () => {
+            const remainMs = this._comboTimerEndAt - performance.now();
+
+            if (remainMs <= 0) {
+                this.stopComboTimer();
+                return;
+            }
+
+            const ratio = Math.max(0, Math.min(1, remainMs / this._comboTimerDurationMs));
+            this.comboTimerBarEl.style.width = `${(ratio * 100).toFixed(2)}%`;
+
+            // 남은시간 짧아질수록 페이드아웃
+            const fadeStartRatio = 0.35;
+            const alpha = ratio < fadeStartRatio
+                ? Math.max(0.12, ratio / fadeStartRatio)
+                : 1;
+            this.comboTimerWrapEl.style.opacity = alpha.toFixed(3);
+
+            this._comboTimerRaf = requestAnimationFrame(tick);
+        };
+
+        this._comboTimerRaf = requestAnimationFrame(tick);
+    }
+
+    stopComboTimer() {
+        if (this._comboTimerRaf) {
+            cancelAnimationFrame(this._comboTimerRaf);
+            this._comboTimerRaf = null;
+        }
+
+        if (!this.comboTimerWrapEl || !this.comboTimerBarEl) return;
+
+        this.comboTimerBarEl.style.width = "0%";
+        this.comboTimerWrapEl.style.opacity = "0";
+        this.comboTimerWrapEl.classList.remove("show");
     }
 }

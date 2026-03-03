@@ -152,6 +152,31 @@ body {
     overflow: visible;
 }
 
+#comboTimerWrap {
+    margin-top: 8px;
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#comboTimerWrap.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#comboTimerBar {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ffffff 0%, #ffd60a 55%, #ff3b30 100%);
+    transform-origin: left center;
+}
+
 /* ===== 보드 ===== */
 #board {
     position: relative;
@@ -561,6 +586,23 @@ body {
     flex-shrink: 0;
 }
 
+#resetProgressBtn {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: none;
+    background: #3a1e1e;
+    color: #ffdede;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+#resetProgressBtn:hover {
+    background: #5a2a2a;
+}
+
 /* ===== 기타 ===== */
 #gameGuide {
     margin-top: 14px;
@@ -919,7 +961,7 @@ body.board-drag-lock {
 }
 
 #startGuideOverlay.title-only .guide-title {
-    top: -5%;
+    top: -3%;
 }
 
 /* 시작 가이드(제목 포함) 페이드아웃 */

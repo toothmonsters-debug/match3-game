@@ -17,6 +17,8 @@ import {
 
 export class Game {
     constructor() {
+        this._saveKey = "m3_save_v1";
+
         // UI
         this.upgrades = new UpgradeSystem();
         this.scoreSystem = new ScoreSystem(this.upgrades);
@@ -45,6 +47,8 @@ export class Game {
 
         this.score = 0;
         this.stage = 1;
+        this.bestScore = 0;
+        this.bestCombo = 0;
         this.baseTimeSec = 60;
 
         this.baseStageScore = 10000;
@@ -87,6 +91,10 @@ export class Game {
             },
             onComboPopup: (text, visibleMs) => {
                 this.ui.showBigPopup(text, visibleMs);
+
+                // ✅ 콤보일 때만 가로바 동작
+                if (/COMBO/.test(text)) this.ui.startComboTimer(visibleMs);
+                else this.ui.stopComboTimer();
             },
             onStageCheck: () => {
                 this.checkStageProgress();
@@ -110,6 +118,7 @@ export class Game {
             if (ok) {
                 this.ui.updatePoints(this.upgrades.points);
                 this.ui.refreshShop(this.upgrades);
+                this.saveProgress();
                 playSfx("coin");
             } else {
                 playSfx("swap");
@@ -136,6 +145,7 @@ export class Game {
 
         const soundSlider = document.getElementById("soundVol");
         const muteBtn = document.getElementById("muteBtn");
+        const resetProgressBtn = document.getElementById("resetProgressBtn");
 
         if (soundSlider) {
             setMasterVolume(parseFloat(soundSlider.value)); // 초기값 동기화
@@ -153,7 +163,22 @@ export class Game {
             });
         }
 
+        if (resetProgressBtn) {
+            resetProgressBtn.addEventListener("click", async () => {
+                if (this.isPreparingStart) return;
+
+                const ok1 = window.confirm("업그레이드/포인트/최고기록을 초기화할까요?");
+                if (!ok1) return;
+                const ok2 = window.confirm("정말 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+                if (!ok2) return;
+
+                await this.resetAllProgress();
+            });
+        }
+
         this.boardCtrl.initBoardEmpty((e, r, c) => this.inputCtrl.onMouseDown(e, r, c));
+
+        this.loadProgress();
         this.syncStats();
         this.updateHUD();
         
@@ -162,6 +187,105 @@ export class Game {
 
         // constructor 마지막 근처 (초기 상태에서 표시)
         this.ui.showStartGuide();
+    }
+
+    _safeReadSave() {
+        try {
+            const raw = localStorage.getItem(this._saveKey);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === "object" ? parsed : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async resetAllProgress() {
+        this.timerCtrl.stop();
+        stopBgm(false);
+        this.ui.stopComboTimer();
+
+        this.started = false;
+        this.isGameOver = false;
+        this.isBusy = false;
+        this.isShopOpen = false;
+
+        this.upgrades.points = 0;
+        this.upgrades.levels = Object.fromEntries(
+            Object.keys(this.upgrades.levels).map((k) => [k, 0])
+        );
+
+        this.bestScore = 0;
+        this.bestCombo = 0;
+        this.lastGainedPoints = 0;
+
+        this.score = 0;
+        this.stage = 1;
+        this.stageRequirement = this.baseStageScore;
+        this.targetScore = this.stageRequirement;
+
+        this.ui.hideGameOver();
+        this.ui.closeShopOverlay();
+        this.ui.hideShopOpenButton();
+
+        const gameWrap = document.getElementById("gameWrap");
+        if (gameWrap) {
+            gameWrap.classList.remove("playing");
+            gameWrap.classList.remove("gameover");
+        }
+
+        this.boardEl.classList.remove("shake");
+        this.boardCtrl.initBoardEmpty((e, r, c) => this.inputCtrl.onMouseDown(e, r, c));
+
+        this.ui.setRestartLabel("시작");
+        this.ui.showStartGuide();
+        this.syncStats();
+        this.updateHUD();
+
+        try {
+            localStorage.removeItem(this._saveKey);
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    loadProgress() {
+        const save = this._safeReadSave();
+        if (!save) return;
+
+        const srcLevels = save.levels || {};
+        const nextLevels = { ...this.upgrades.levels };
+        for (const key of Object.keys(nextLevels)) {
+            const v = Number(srcLevels[key] ?? 0);
+            nextLevels[key] = Number.isFinite(v)
+                ? Math.max(0, Math.min(this.upgrades.maxLevel, Math.floor(v)))
+                : 0;
+        }
+
+        this.upgrades.levels = nextLevels;
+
+        const points = Number(save.points ?? 0);
+        this.upgrades.points = Number.isFinite(points) ? Math.max(0, Math.floor(points)) : 0;
+
+        const bestScore = Number(save.bestScore ?? 0);
+        this.bestScore = Number.isFinite(bestScore) ? Math.max(0, Math.floor(bestScore)) : 0;
+
+        const maxCombo = Number(save.maxCombo ?? 0);
+        this.bestCombo = Number.isFinite(maxCombo) ? Math.max(0, Math.floor(maxCombo)) : 0;
+    }
+
+    saveProgress() {
+        try {
+            const payload = {
+                points: this.upgrades.points,
+                levels: { ...this.upgrades.levels },
+                bestScore: Math.max(0, this.bestScore || 0),
+                maxCombo: Math.max(0, this.bestCombo || 0)
+            };
+            localStorage.setItem(this._saveKey, JSON.stringify(payload));
+        } catch (e) {
+            // ignore storage failures (private mode / quota)
+        }
     }
 
     async _playStartCountdown() {
@@ -194,7 +318,7 @@ export class Game {
     async start() {
         if (this.started || this.isPreparingStart) return;
         this.isPreparingStart = true;
-
+        this.ui.stopComboTimer();
         try {
             this.started = false;
             this.isGameOver = false;
@@ -235,7 +359,7 @@ export class Game {
     async restart() {
         if (this.isPreparingStart) return;
         this.isPreparingStart = true;
-
+        this.ui.stopComboTimer();
         try {
             this.started = false;
             this.isGameOver = false;
@@ -296,6 +420,9 @@ export class Game {
         const boardModel = this.boardCtrl.getBoardModel();
         const scoreRef = { value: this.score };
 
+        // playGameOverSequence() 초반
+        this.ui.stopComboTimer();
+
         while (true) {
             const board = boardModel.get();
             let found = false;
@@ -313,6 +440,7 @@ export class Game {
         }
 
         this.score = scoreRef.value;
+        this.bestScore = Math.max(this.bestScore || 0, this.score || 0);
         this.updateHUD();
         this.started = false;
 
@@ -334,6 +462,7 @@ export class Game {
         this.lastGainedPoints = gainedPoints;
         this.upgrades.addPoints(gainedPoints);
         const maxCombo = this.boardCtrl.getMaxCombo ? this.boardCtrl.getMaxCombo() : 0;
+        this.bestCombo = Math.max(this.bestCombo || 0, maxCombo || 0);
 
         document.getElementById("gameWrap").classList.remove("playing");
         document.getElementById("gameWrap").classList.add("gameover");
@@ -354,6 +483,8 @@ export class Game {
         this.ui.showGameOver(this.score, gainedPoints, maxCombo);
         this.ui.showShopOpenButton(this.lastGainedPoints);
         this.ui.setRestartLabel("다시 시작");
+
+        this.saveProgress();
 
         this.ui.showGameTitleOnly();
     }

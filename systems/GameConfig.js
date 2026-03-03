@@ -30,8 +30,8 @@ export class GameConfig {
     }
 
     // 특수 기본값 및 업그레이드 단위
-    getBombBase() { return 200; }
-    getCrossBase() { return 200; }
+    getBombBase() { return 300; }
+    getCrossBase() { return 300; }
     getBombPerLevel() { return 300; }
     getCrossPerLevel() { return 300; }
 

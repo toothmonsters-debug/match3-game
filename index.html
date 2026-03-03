@@ -94,7 +94,12 @@
 			</div>
 
 			<div id="board"></div>
-			<button id="restart">시작</button>
+
+			<div id="comboTimerWrap" aria-hidden="true">
+    <div id="comboTimerBar"></div>
+</div>
+
+<button id="restart">시작</button>
 
 			<div id="soundPanel">
 				<div class="sound-row">
@@ -102,6 +107,7 @@
 					<input id="soundVol" type="range" min="0" max="1" step="0.01" value="1">
 				</div>
 				<button id="muteBtn">🔊</button>
+				<button id="resetProgressBtn" type="button">초기화</button>
 			</div>
 
 		</div>
