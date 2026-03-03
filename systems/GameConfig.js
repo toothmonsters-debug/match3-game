@@ -35,6 +35,7 @@ export class GameConfig {
     getBombPerLevel() { return 300; }
     getCrossPerLevel() { return 300; }
 
+
     // 시간 관련
     getTimeBase() { return 60; }
     getTimePerLevel() { return 2; }
