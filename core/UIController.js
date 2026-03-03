@@ -61,8 +61,34 @@ export class UIController {
 
     showComboTitleAtGameOver(combo) {
         const c = Math.max(0, Number(combo) || 0);
-        const line1Text = `<span class="num99">${c}</span>콤보를`;
-        const line2Text = c >= 100 ? "달성했다!!" : "해버렸다!!";
+        let line1Text = `<span class="num99">${c}</span>콤보`;
+        let line2Text = "해버렸다!!";
+
+        if (c <= 30) {
+            line1Text = `<span class="num99">${c}</span>콤보라니`;
+            line2Text = "흑흑...!!";
+        } else if (c <= 60) {
+            line1Text = `<span class="num99">${c}</span>콤보?`;
+            line2Text = "아직멀었어!!";
+        } else if (c <= 98) {
+            line1Text = `<span class="num99">${c}</span>콤보!`;
+            line2Text = "거의 다왔어!!";
+        } else if (c <= 115) {
+            line1Text = `<span class="num99">${c}</span>콤보를`;
+            line2Text = "해버렸다!!";
+        } else if (c <= 130) {
+            line1Text = `<span class="num99">${c}</span>콤보쯤은`;
+            line2Text = "너무쉽지!!";
+        } else if (c <= 150) {
+            line1Text = `<span class="num99">${c}</span>콤보..`;
+            line2Text = "하하!!";
+        } else if (c <= 175) {
+            line1Text = `<span class="num99">${c}</span>콤보는`;
+            line2Text = "기본이랄까?";
+        } else {
+            line1Text = `<span class="num99">${c}</span>콤보!!`;
+            line2Text = "신의영역!!";
+        }
 
         if (!this.startGuideEl) return;
         const line1 = this.startGuideEl.querySelector(".guide-title .line1");
