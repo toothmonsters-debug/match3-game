@@ -4,6 +4,56 @@
     box-sizing: border-box;
 }
 
+.fx-glow,
+.fx-wave,
+.fx-shard {
+    position: absolute;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 130;
+}
+
+.fx-glow {
+    width: 41px;
+    height: 41px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(123,223,242,0.5) 45%, rgba(123,223,242,0) 100%);
+    animation: fxGlowOut 0.18s ease-out forwards;
+}
+
+.fx-wave {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(180, 235, 255, 0.85);
+    box-shadow: 0 0 6px rgba(123,223,242,0.6);
+    animation: fxWaveOut 0.26s ease-out forwards;
+}
+
+.fx-shard {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(123,223,242,0.75));
+    box-shadow: 0 0 4px rgba(255,255,255,0.55);
+    animation: fxShardFly 0.32s ease-out forwards;
+}
+
+@keyframes fxGlowOut {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(2.57); }
+}
+
+@keyframes fxWaveOut {
+    0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.4); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(4.05); }
+}
+
+@keyframes fxShardFly {
+    0% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) scale(0.54); }
+}
+
 :root {
     --cell-size: 50px;
     --cell-gap: 4px;
@@ -244,6 +294,10 @@ body {
 
 .cell.release {
     animation: jellyRelease 0.22s ease;
+}
+
+.cell.hit-bump {
+    animation: hitBump 0.16s ease-out;
 }
 
 .cell .icon {
@@ -643,7 +697,7 @@ body {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 50;
+    z-index: 120;
 }
 
 #stageBanner {
@@ -748,6 +802,12 @@ body.board-drag-lock {
 @keyframes jellyRelease {
     0% { transform: scale(0.9,1.1); }
     50% { transform: scale(1.06,0.94); }
+    100% { transform: scale(1); }
+}
+
+@keyframes hitBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.14); }
     100% { transform: scale(1); }
 }
 

@@ -313,7 +313,7 @@ export class BoardController {
     }
 
     /** 변경: removeCells 옵션에 triggerBomb, triggerCross를 받을 수 있도록 함 (폴백 존재) */
-    async removeCells(initial, matchSize = 3, scoreRef, { isSpecialActivation = false, activationTriggers = [], triggerBomb = 0, triggerCross = 0 } = {}) {
+    async removeCells(initial, matchSize = 3, scoreRef, { isSpecialActivation = false, activationTriggers = [], triggerBomb = 0, triggerCross = 0, chainLevel = 0 } = {}) {
         const perfStore = PERF_ENABLED() ? (this._perfStore || perfInitStore()) : null;
         const t0 = perfStore ? perfNow() : 0;
 
@@ -392,7 +392,9 @@ export class BoardController {
 
         for (const [r, c] of cells) {
             if (!board[r][c]) continue;
-            this.renderer.playExplode(r, c);
+            const isSpecialCell = board[r][c].special === "bomb" || board[r][c].special === "cross";
+            const boost = isSpecialCell ? 1.5 : 1.15;
+            this.renderer.playExplode(r, c, chainLevel, { boost });
             board[r][c] = null;
         }
 
@@ -551,7 +553,8 @@ export class BoardController {
                 isSpecialActivation: finalIsSpecialActivation,
                 activationTriggers,
                 triggerBomb,
-                triggerCross
+                triggerCross,
+                chainLevel: Math.max(0, loops - 1)
             });
 
             await this.applyGravityAndRefill();
