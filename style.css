@@ -977,6 +977,28 @@ body.board-drag-lock {
     to { opacity: 0; }
 }
 
+.title-firework {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0) scale(1.8);
+    opacity: 1;
+    animation: titleFireworkPop 0.95s ease-out forwards;
+}
+
+@keyframes titleFireworkPop {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1.8);
+        opacity: 1;
+    }
+    70% {
+        transform: translate3d(var(--fx-dx, 0px), var(--fx-dy, 0px), 0) scale(1.1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(var(--fx-dx, 0px), var(--fx-dy, 0px), 0) scale(0.55);
+        opacity: 0;
+    }
+}
+
 
 
 

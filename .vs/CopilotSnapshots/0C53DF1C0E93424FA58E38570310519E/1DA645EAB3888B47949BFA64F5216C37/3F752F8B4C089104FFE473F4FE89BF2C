@@ -1,0 +1,445 @@
+﻿import { playSfx } from "../audio/Sfx.js";
+export class UIController {
+    constructor(scoreSystem) {
+        this.scoreSystem = scoreSystem;
+        // DOM 캐시
+        this.scoreEl = document.getElementById("score");
+        this.stageEl = document.getElementById("stage");
+        this.targetEl = document.getElementById("target");
+        this.timeEl = document.getElementById("time");
+        this.stageBannerEl = document.getElementById("stageBanner");
+        this.countdownEl = document.getElementById("countdown");
+        this.gameOverOverlayEl = document.getElementById("gameOverOverlay");
+        this.gameOverScoreEl = this.gameOverOverlayEl
+            ? this.gameOverOverlayEl.querySelector(".go-score")
+            : null;
+        this.shopOpenBtn = document.getElementById("shopOpenBtn");
+        this.shopCloseBtn = document.getElementById("shopCloseBtn");
+        this.shopOverlayEl = document.getElementById("shopOverlay");
+        this.startGuideEl = document.getElementById("startGuideOverlay");
+
+        // ✅ 콤보 유지시간 바
+        this.comboTimerWrapEl = document.getElementById("comboTimerWrap");
+        this.comboTimerBarEl = document.getElementById("comboTimerBar");
+        this._comboTimerRaf = null;
+        this._comboTimerDurationMs = 0;
+        this._comboTimerEndAt = 0;
+
+        this._stageBannerTimer = null;
+        this._startGuideFadeTimer = null;
+        this._titleFxTimers = [];
+    }
+
+    _setGuideTitle(line1Text, line2Text) {
+        if (!this.startGuideEl) return;
+        const line1 = this.startGuideEl.querySelector(".guide-title .line1");
+        const line2 = this.startGuideEl.querySelector(".guide-title .line2");
+        if (line1) line1.textContent = line1Text;
+        if (line2) line2.textContent = line2Text;
+    }
+
+    resetGuideTitleDefault() {
+        if (!this.startGuideEl) return;
+        const line1 = this.startGuideEl.querySelector(".guide-title .line1");
+        const line2 = this.startGuideEl.querySelector(".guide-title .line2");
+
+        if (line1) {
+            line1.innerHTML = `<span class="num99">99</span>콤보를`;
+        }
+        if (line2) {
+            line2.textContent = "하고싶어!!";
+        }
+    }
+
+    showComboTitleAtGameOver(combo) {
+        const c = Math.max(0, Number(combo) || 0);
+        const line1Text = `${c}콤보를`;
+        const line2Text = c >= 100 ? "달성했다!!" : "해버렸다!!";
+        this._setGuideTitle(line1Text, line2Text);
+    }
+
+    playTitleFireworks(durationMs = 2000) {
+        if (!this.startGuideEl) return;
+
+        this._titleFxTimers.forEach((id) => clearTimeout(id));
+        this._titleFxTimers = [];
+
+        const endAt = Date.now() + Math.max(300, durationMs);
+        const colors = ["#ffd166", "#ff6b6b", "#7bdff2", "#c8ff6b", "#c77dff"];
+
+        const spawn = () => {
+            if (!this.startGuideEl || Date.now() >= endAt) return;
+
+            const fx = document.createElement("div");
+            const size = 7 + Math.random() * 10;
+            fx.style.position = "absolute";
+            fx.style.left = `${10 + Math.random() * 80}%`;
+            fx.style.top = `${8 + Math.random() * 50}%`;
+            fx.style.width = `${size}px`;
+            fx.style.height = `${size}px`;
+            fx.style.borderRadius = "50%";
+            fx.style.pointerEvents = "none";
+            fx.style.zIndex = "995";
+            fx.style.background = colors[Math.floor(Math.random() * colors.length)];
+            fx.style.boxShadow = "0 0 10px rgba(255,255,255,0.6)";
+            fx.style.transform = "scale(0.2)";
+            fx.style.opacity = "1";
+            fx.style.transition = "transform 0.9s ease-out, opacity 0.9s ease-out";
+
+            this.startGuideEl.appendChild(fx);
+
+            requestAnimationFrame(() => {
+                const dx = (Math.random() * 2 - 1) * 120;
+                const dy = (Math.random() * 2 - 1) * 100;
+                fx.style.transform = `translate(${dx}px, ${dy}px) scale(1.8)`;
+                fx.style.opacity = "0";
+            });
+
+            const rm = setTimeout(() => fx.remove(), 920);
+            this._titleFxTimers.push(rm);
+
+            const next = setTimeout(spawn, 110);
+            this._titleFxTimers.push(next);
+        };
+
+        spawn();
+    }
+
+    _formatComma(value) {
+        return Number(value || 0).toLocaleString("ko-KR");
+    }
+
+    bindRestart(handler) {
+        const restartBtn = document.getElementById("restart");
+        if (!restartBtn) return;
+
+        // 더블클릭 방지: 클릭 시 잠깐 disabled 처리
+        restartBtn.onclick = () => {
+            if (restartBtn.disabled) return;
+            restartBtn.disabled = true;
+            playSfx("swap");
+            // 안전하게 handler 호출 (sync/async 모두 지원)
+            Promise.resolve().then(() => handler()).finally(() => {
+                // 버튼은 이벤트 처리 완료 후 소폭 지연을 두고 재활성화
+                setTimeout(() => {
+                    restartBtn.disabled = false;
+                }, 400);
+            });
+        };
+    }
+
+    // 버튼 텍스트를 런타임에 바꿀 수 있도록 단순한 API 추가
+    setRestartLabel(text) {
+        const restartBtn = document.getElementById("restart");
+        if (!restartBtn) return;
+        restartBtn.textContent = text;
+    }
+
+    updateHUD({ score, stage, targetScore }) {
+        if (this.scoreEl) this.scoreEl.textContent = this._formatComma(score);
+        if (this.stageEl) this.stageEl.textContent = stage;
+        if (this.targetEl) this.targetEl.textContent = this._formatComma(targetScore);
+    }
+
+    updateTime(timeLeft) {
+        if (this.timeEl) this.timeEl.textContent = timeLeft;
+    }
+
+    showStageBanner(stage) {
+        if (!this.stageBannerEl) return;
+        const el = this.stageBannerEl;
+        el.textContent = `STAGE ${stage}`;
+        el.classList.add("show");
+        clearTimeout(this._stageBannerTimer);
+        this._stageBannerTimer = setTimeout(() => el.classList.remove("show"), 900);
+    }
+
+    showCountdown(sec) {
+        if (!this.countdownEl) return;
+        this.countdownEl.textContent = sec;
+        this.countdownEl.classList.add("show");
+    }
+
+    hideCountdown() {
+        if (!this.countdownEl) return;
+        this.countdownEl.classList.remove("show");
+    }
+
+    _parseCssTimeMs(value) {
+        if (!value) return 0;
+        const v = value.trim();
+        if (v.endsWith("ms")) return parseFloat(v);
+        if (v.endsWith("s")) return parseFloat(v) * 1000;
+        return 0;
+    }
+
+    showBigPopup(text, visibleMs = this.scoreSystem?.cfg?.getComboPopupBaseMs?.() ?? 1500) {
+        const log = document.getElementById("comboLog");
+        if (!log) return;
+
+        log.textContent = text;
+        log.style.opacity = "1";
+        log.style.transform = "translateY(0)";
+
+        if (this._comboFadeTimer) {
+            clearTimeout(this._comboFadeTimer);
+        }
+
+        // comboLog CSS transition 시간(첫 번째 duration)을 읽어서
+        // "페이드 완료 시점 = visibleMs"가 되도록 역산
+        const cs = getComputedStyle(log);
+        const firstDuration = (cs.transitionDuration || "1s").split(",")[0];
+        const fadeMs = this._parseCssTimeMs(firstDuration) || 1000;
+
+        const startFadeAfter = Math.max(0, visibleMs - fadeMs);
+
+        this._comboFadeTimer = setTimeout(() => {
+            log.style.opacity = "0";
+            log.style.transform = "translateY(-6px)";
+        }, startFadeAfter);
+    }
+
+
+    showGameOver(score, gainedPoints = 0, maxCombo = 0) {
+        if (!this.gameOverOverlayEl) return;
+
+        if (this.gameOverScoreEl) {
+            this.gameOverScoreEl.textContent = `SCORE : ${this._formatComma(score)}`;
+        }
+
+        let maxComboEl = this.gameOverOverlayEl.querySelector(".go-maxcombo");
+        if (!maxComboEl) {
+            maxComboEl = document.createElement("div");
+            maxComboEl.className = "go-maxcombo";
+            this.gameOverOverlayEl.appendChild(maxComboEl);
+        }
+
+        if (maxCombo > 0) {
+            maxComboEl.textContent = `MAX COMBO: ${this._formatComma(maxCombo)}`;
+            maxComboEl.classList.add("show");
+        } else {
+            maxComboEl.classList.remove("show");
+        }
+
+        this.gameOverOverlayEl.classList.add("show");
+    }
+
+    hideGameOver() {
+        if (!this.gameOverOverlayEl) return;
+        this.gameOverOverlayEl.classList.remove("show");
+    }
+
+    bindUpgradeSystem(upgrades, onBuy) {
+        this.pointEl = document.getElementById("pointValue");
+        this.updatePoints(upgrades.points);
+
+        document.querySelectorAll("#shopPanel .shop-item").forEach(item => {
+            const key = item.dataset.upg;
+            item.onclick = () => {
+                const ok = onBuy(key);
+                if (ok !== false) {
+                    this.refreshShop(upgrades);
+
+                }
+            };
+        });
+
+        this.refreshShop(upgrades);
+    }
+
+
+    updatePoints(p) {
+        if (this.pointEl) this.pointEl.textContent = p;
+        
+    }
+
+    refreshShop(upgrades) {
+        document.querySelectorAll("#shopPanel .shop-item").forEach(item => {
+            const key = item.dataset.upg;
+
+            const lv = upgrades.getLevel(key);
+            const price = upgrades.getPrice(key);
+            const canBuy = upgrades.canBuy(key);
+
+            const lvEl = item.querySelector(".lv");
+            const priceEl = item.querySelector(".price");
+            const previewEl = item.querySelector(".preview");
+
+            if (lvEl) lvEl.textContent = lv;
+            if (priceEl) priceEl.textContent = price;
+
+            // ---- 미리보기 계산: ScoreSystem 사용 ----
+            let previewValue = 0;
+
+            if (key === "baseScore") {
+                // 3매치 기준 per-block 점수을 명확히 보여줌 (GameConfig 반영)
+                previewValue = this.scoreSystem.calcPerBlockScore({ removedTotal: 3, combo: 0 });
+            }
+            else if (key === "bombScore") {
+                // 폭탄 1개 발동 시 블럭 1개당 특수 보너스
+                previewValue = this.scoreSystem.calcSpecialBonus({ bombCount: 1, crossCount: 0 });
+            }
+            else if (key === "crossScore") {
+                previewValue = this.scoreSystem.calcSpecialBonus({ bombCount: 0, crossCount: 1 });
+            }
+            else if (key === "comboScore") {
+                // 콤보 1 기준 보너스 예시 (cfg 기반 단가)
+                previewValue = this.scoreSystem.calcComboBonus(1);
+            }
+            else if (key === "timeBonus") {
+                // 시간은 GameConfig 기반으로 표시하도록 변화
+                const lv = upgrades.getLevel("timeBonus");
+                const cfg = this.scoreSystem.cfg;
+                previewValue = cfg.getTimeBase() + lv * cfg.getTimePerLevel();
+            }
+            // comboKeep 분기 교체
+            else if (key === "comboKeep") {
+                const lv = upgrades.getLevel("comboKeep");
+                const cfg = this.scoreSystem.cfg;
+                previewValue = ((cfg.getComboKeepBaseMs() + lv * cfg.getComboKeepPerLevelMs()) / 1000)
+                    .toFixed(3)
+                    .replace(/\.?0+$/, "");
+            }
+
+            if (previewEl) previewEl.textContent = previewValue;
+
+            // ---- 살 수 있나 UI 처리 ----
+            if (canBuy) {
+                item.classList.remove("disabled");              
+            } else {
+                item.classList.add("disabled");
+             
+            }
+        });
+
+        this.updatePoints(upgrades.points);
+    }
+
+    bindShopOpen(handler) {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.onclick = handler;
+    }
+
+    bindShopClose(handler) {
+        if (!this.shopCloseBtn) return;
+        this.shopCloseBtn.onclick = handler;
+    }
+
+    showShopOpenButton(gainedPoints) {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.innerHTML = `상점 열기<br><small>획득포인트 : ${gainedPoints}</small>`;
+        this.shopOpenBtn.classList.add("show");
+    }
+
+    hideShopOpenButton() {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.classList.remove("show");
+    }
+
+    openShopOverlay() {
+        if (!this.shopOverlayEl) return;
+        this.shopOverlayEl.classList.add("show");
+
+        // ✅ 상점을 연 이후에는 획득포인트 라벨 제거
+        if (this.shopOpenBtn) {
+            this.shopOpenBtn.textContent = "상점 열기";
+        }
+    }
+
+    closeShopOverlay() {
+        if (!this.shopOverlayEl) return;
+        this.shopOverlayEl.classList.remove("show");
+    }
+
+    showStartGuide() {
+        if (!this.startGuideEl) return;
+        this.resetGuideTitleDefault();
+        this.startGuideEl.classList.remove("title-only");
+        this.startGuideEl.classList.add("show");
+    }
+
+    hideStartGuide() {
+        if (!this.startGuideEl) return;
+        this.startGuideEl.classList.remove("show");
+        this.startGuideEl.classList.remove("title-only");
+    }
+
+    showGameTitleOnly() {
+        if (!this.startGuideEl) return;
+        this.startGuideEl.classList.add("show");
+        this.startGuideEl.classList.add("title-only");
+    }
+
+    // 메서드 추가
+    hideStartGuideWithFade(durationMs = 400) {
+        if (!this.startGuideEl) return;
+
+        this.startGuideEl.classList.remove("fade-out");
+        // reflow로 애니메이션 재시작 보장
+        void this.startGuideEl.offsetWidth;
+        this.startGuideEl.classList.add("fade-out");
+
+        if (this._startGuideFadeTimer) {
+            clearTimeout(this._startGuideFadeTimer);
+        }
+
+        this._startGuideFadeTimer = setTimeout(() => {
+            this.hideStartGuide();
+            this.startGuideEl.classList.remove("fade-out");
+        }, durationMs);
+    }
+
+    startComboTimer(durationMs) {
+        if (!this.comboTimerWrapEl || !this.comboTimerBarEl) return;
+
+        const ms = Math.max(1, Number(durationMs) || 0);
+
+        if (this._comboTimerRaf) {
+            cancelAnimationFrame(this._comboTimerRaf);
+            this._comboTimerRaf = null;
+        }
+
+        this._comboTimerDurationMs = ms;
+        this._comboTimerEndAt = performance.now() + ms;
+
+        this.comboTimerWrapEl.classList.add("show");
+        this.comboTimerWrapEl.style.opacity = "1";
+        this.comboTimerBarEl.style.width = "100%";
+
+        const tick = () => {
+            const remainMs = this._comboTimerEndAt - performance.now();
+
+            if (remainMs <= 0) {
+                this.stopComboTimer();
+                return;
+            }
+
+            const ratio = Math.max(0, Math.min(1, remainMs / this._comboTimerDurationMs));
+            this.comboTimerBarEl.style.width = `${(ratio * 100).toFixed(2)}%`;
+
+            // 남은시간 짧아질수록 페이드아웃
+            const fadeStartRatio = 0.35;
+            const alpha = ratio < fadeStartRatio
+                ? Math.max(0.12, ratio / fadeStartRatio)
+                : 1;
+            this.comboTimerWrapEl.style.opacity = alpha.toFixed(3);
+
+            this._comboTimerRaf = requestAnimationFrame(tick);
+        };
+
+        this._comboTimerRaf = requestAnimationFrame(tick);
+    }
+
+    stopComboTimer() {
+        if (this._comboTimerRaf) {
+            cancelAnimationFrame(this._comboTimerRaf);
+            this._comboTimerRaf = null;
+        }
+
+        if (!this.comboTimerWrapEl || !this.comboTimerBarEl) return;
+
+        this.comboTimerBarEl.style.width = "0%";
+        this.comboTimerWrapEl.style.opacity = "0";
+        this.comboTimerWrapEl.classList.remove("show");
+    }
+}

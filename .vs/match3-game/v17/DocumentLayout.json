@@ -1,0 +1,274 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\yepbe\\source\\repos\\match3-game\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\BoardController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\BoardController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:style.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\InputController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\InputController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\Game.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\Game.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\data\\Config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:data\\Config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Renderer.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:systems\\Renderer.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\audio\\Sfx.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:audio\\Sfx.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\UIController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\UIController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\UpgradeSystem.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:systems\\UpgradeSystem.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\ScoreSystem.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:systems\\ScoreSystem.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Matcher.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:systems\\Matcher.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\GameConfig.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:systems\\GameConfig.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\yepbe\\source\\repos\\match3-game\\main.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:main.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Sfx.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\audio\\Sfx.js",
+              "RelativeDocumentMoniker": "audio\\Sfx.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\audio\\Sfx.js",
+              "RelativeToolTip": "audio\\Sfx.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:47.768Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UIController.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\UIController.js",
+              "RelativeDocumentMoniker": "core\\UIController.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\UIController.js",
+              "RelativeToolTip": "core\\UIController.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:44.167Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "InputController.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\InputController.js",
+              "RelativeDocumentMoniker": "core\\InputController.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\InputController.js",
+              "RelativeToolTip": "core\\InputController.js",
+              "ViewState": "AgIAABEAAAAAAAAAAAAiwGsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:40.875Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BoardController.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\BoardController.js",
+              "RelativeDocumentMoniker": "core\\BoardController.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\BoardController.js",
+              "RelativeToolTip": "core\\BoardController.js",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAewF8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:39.585Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Game.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\Game.js",
+              "RelativeDocumentMoniker": "core\\Game.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\core\\Game.js",
+              "RelativeToolTip": "core\\Game.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:38.405Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Config.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\data\\Config.js",
+              "RelativeDocumentMoniker": "data\\Config.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\data\\Config.js",
+              "RelativeToolTip": "data\\Config.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:34.069Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UpgradeSystem.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\UpgradeSystem.js",
+              "RelativeDocumentMoniker": "systems\\UpgradeSystem.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\UpgradeSystem.js",
+              "RelativeToolTip": "systems\\UpgradeSystem.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:31.365Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ScoreSystem.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\ScoreSystem.js",
+              "RelativeDocumentMoniker": "systems\\ScoreSystem.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\ScoreSystem.js",
+              "RelativeToolTip": "systems\\ScoreSystem.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:29.83Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Renderer.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Renderer.js",
+              "RelativeDocumentMoniker": "systems\\Renderer.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Renderer.js",
+              "RelativeToolTip": "systems\\Renderer.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:23.016Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Matcher.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Matcher.js",
+              "RelativeDocumentMoniker": "systems\\Matcher.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\Matcher.js",
+              "RelativeToolTip": "systems\\Matcher.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:22.287Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "style.css",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\style.css",
+              "RelativeDocumentMoniker": "style.css",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\style.css",
+              "RelativeToolTip": "style.css",
+              "ViewState": "AgIAAGgCAAAAAAAAAAAYwIoCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-02-28T22:49:04.454Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "GameConfig.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\GameConfig.js",
+              "RelativeDocumentMoniker": "systems\\GameConfig.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\systems\\GameConfig.js",
+              "RelativeToolTip": "systems\\GameConfig.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:49:21.293Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\index.html",
+              "RelativeDocumentMoniker": "index.html",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\index.html",
+              "RelativeToolTip": "index.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-02-28T22:49:00.676Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "main.js",
+              "DocumentMoniker": "C:\\Users\\yepbe\\source\\repos\\match3-game\\main.js",
+              "RelativeDocumentMoniker": "main.js",
+              "ToolTip": "C:\\Users\\yepbe\\source\\repos\\match3-game\\main.js",
+              "RelativeToolTip": "main.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-02-28T22:48:57.628Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

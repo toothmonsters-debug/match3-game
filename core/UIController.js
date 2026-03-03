@@ -86,38 +86,54 @@ export class UIController {
         const power = Math.max(1, Number(intensity) || 1);
         const colors = ["#ffd166", "#ff6b6b", "#7bdff2", "#c8ff6b", "#c77dff"];
 
+        const titleEl = this.startGuideEl.querySelector(".guide-title");
+
         const spawn = () => {
             if (!this.startGuideEl || Date.now() >= endAt) return;
 
-            const fx = document.createElement("div");
-            const size = (7 + Math.random() * 10) * (0.9 + power * 0.25);
-            fx.style.position = "absolute";
-            fx.style.left = `${10 + Math.random() * 80}%`;
-            fx.style.top = `${8 + Math.random() * 50}%`;
-            fx.style.width = `${size}px`;
-            fx.style.height = `${size}px`;
-            fx.style.borderRadius = "50%";
-            fx.style.pointerEvents = "none";
-            fx.style.zIndex = "995";
-            fx.style.background = colors[Math.floor(Math.random() * colors.length)];
-            fx.style.boxShadow = "0 0 10px rgba(255,255,255,0.6)";
-            fx.style.transform = "scale(0.2)";
-            fx.style.opacity = "1";
-            fx.style.transition = "transform 0.9s ease-out, opacity 0.9s ease-out";
+            const hostRect = this.startGuideEl.getBoundingClientRect();
+            const titleRect = titleEl ? titleEl.getBoundingClientRect() : hostRect;
+            const centerX = titleRect.left + titleRect.width / 2 - hostRect.left;
+            const centerY = titleRect.top + titleRect.height / 2 - hostRect.top;
 
-            this.startGuideEl.appendChild(fx);
+            // 한 번 발사할 때는 같은 시작점에서 5~8개를 랜덤 방향으로 분사
+            const spawnAngle = Math.random() * Math.PI * 2;
+            const spawnRx = 54 + Math.random() * 42;
+            const spawnRy = 18 + Math.random() * 14;
+            const startX = centerX + Math.cos(spawnAngle) * spawnRx;
+            const startY = centerY + Math.sin(spawnAngle) * spawnRy;
 
-            requestAnimationFrame(() => {
-                const dx = (Math.random() * 2 - 1) * (100 + power * 35);
-                const dy = (Math.random() * 2 - 1) * (85 + power * 30);
-                fx.style.transform = `translate(${dx}px, ${dy}px) scale(${1.4 + power * 0.45})`;
-                fx.style.opacity = "0";
-            });
+            const batchCount = 5 + Math.floor(Math.random() * 4); // 5~8
 
-            const rm = setTimeout(() => fx.remove(), 920);
-            this._titleFxTimers.push(rm);
+            for (let i = 0; i < batchCount; i++) {
+                const fx = document.createElement("div");
+                const size = (6 + Math.random() * 8) * (0.9 + power * 0.18);
+                fx.style.position = "absolute";
+                fx.style.left = `${startX}px`;
+                fx.style.top = `${startY}px`;
+                fx.style.width = `${size}px`;
+                fx.style.height = `${size}px`;
+                fx.style.borderRadius = "50%";
+                fx.style.pointerEvents = "none";
+                fx.style.zIndex = "1200";
+                fx.style.background = colors[Math.floor(Math.random() * colors.length)];
+                fx.style.boxShadow = `0 0 ${5 + power * 3}px rgba(255,255,255,0.65)`;
 
-            const nextDelay = Math.max(28, 110 - Math.floor((power - 1) * 28));
+                const burstAngle = Math.random() * Math.PI * 2;
+                const burstDist = (55 + Math.random() * 55) * (0.9 + power * 0.35);
+                const dx = Math.cos(burstAngle) * burstDist * 1.35;
+                const dy = Math.sin(burstAngle) * burstDist * 0.8;
+                fx.style.setProperty("--fx-dx", `${dx}px`);
+                fx.style.setProperty("--fx-dy", `${dy}px`);
+                fx.classList.add("title-firework");
+
+                this.startGuideEl.appendChild(fx);
+
+                const rm = setTimeout(() => fx.remove(), 980);
+                this._titleFxTimers.push(rm);
+            }
+
+            const nextDelay = 300;
             const next = setTimeout(spawn, nextDelay);
             this._titleFxTimers.push(next);
         };
