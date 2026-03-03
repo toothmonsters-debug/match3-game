@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Match3 Refactored</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+	<div id="gameWrap">
+		<div id="boardWrap">
+			<div id="hudPanel">
+				<div id="ui-stage">STAGE <span id="stage">1</span></div>
+				<div id="ui-score">점수: <span id="score">0</span></div>
+				<div id="ui-target">목표점수: <span id="target">10000</span></div>
+				<div id="ui-time">남은시간: <span id="time">60</span>초</div>
+			</div>
+
+			<!-- ✅ 시작 가이드 오버레이 추가 -->
+			<div id="startGuideOverlay" class="show">
+    <div class="guide-title" aria-hidden="true">
+        <span class="line1"><span class="num99">99</span>콤보를</span>
+        <span class="line2">하고싶어!!</span>
+    </div>
+
+    <div class="guide-card">
+        <h3>게임 방법</h3>
+        <ul>
+            <li>🎯 같은 색 3개 이상 매치 → 점수 획득</li>
+            <li>🖱️ 클릭/터치 후 드래그로 가로·세로 이동</li>
+            <li>✨ 4개 이상 매치 → 특수 블록 생성</li>
+            <li>💥 특수 발동 시 추가 보너스 획득</li>
+            <li>⏱️ 제한 시간 내 최대 점수 도전</li>
+        </ul>
+    </div>
+</div>
+
+			<div id="comboLog"></div>
+			<div id="effectLayer"></div>
+			<div id="stageBanner"></div>
+			<div id="countdown"></div>
+
+			<div id="gameOverOverlay">
+				<div class="go-title">GAME OVER</div>
+				<div class="go-score"></div>
+			</div>
+
+			<button id="shopOpenBtn" type="button">상점 열기 (P: 0)</button>
+
+			<div id="shopOverlay">
+				<div id="shopPanel">
+					<div class="shop-header">POINT: <span id="pointValue">0</span></div>
+					<div class="shop-grid">
+						<div class="shop-item" data-upg="baseScore">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 블럭 보너스</div>
+							<div class="shop-desc">+100 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">100</span></div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+						<div class="shop-item" data-upg="timeBonus">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 시간 증가</div>
+							<div class="shop-desc">+2초 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">60</span>s</div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+						<div class="shop-item" data-upg="bombScore">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 폭탄 보너스</div>
+							<div class="shop-desc">+300 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">100</span></div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+						<div class="shop-item" data-upg="crossScore">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 십자 보너스</div>
+							<div class="shop-desc">+300 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">100</span></div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+						<div class="shop-item" data-upg="comboScore">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 콤보 보너스</div>
+							<div class="shop-desc">+20 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">0</span></div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+						<!-- shop-grid 내부에 아이템 1개 추가 -->
+						<div class="shop-item" data-upg="comboKeep">
+							<div class="shop-title">[Lv. <span class="lv">0</span>] 콤보 시간</div>
+							<div class="shop-desc">+0.1초 / 레벨</div>
+							<div class="shop-preview">현재: <span class="preview">1.8</span>s</div>
+							<div class="shop-price">가격: <span class="price">1</span> P</div>
+						</div>
+					</div>
+				</div>
+				<button id="shopCloseBtn" type="button">상점 닫기</button>
+			</div>
+
+			<div id="board"></div>
+
+			<div id="comboTimerWrap" aria-hidden="true">
+    <div id="comboTimerBar"></div>
+</div>
+
+<button id="restart">시작</button>
+
+			<div id="soundPanel">
+				<div class="sound-row">
+					<span>🔊 사운드</span>
+					<input id="soundVol" type="range" min="0" max="1" step="0.01" value="1">
+				</div>
+				<button id="muteBtn">🔊</button>
+				<button id="resetProgressBtn" type="button">초기화</button>
+			</div>
+
+		</div>
+
+	</div>
+
+
+
+	<script type="module" src="./main.js"></script>
+</body>
+</html>

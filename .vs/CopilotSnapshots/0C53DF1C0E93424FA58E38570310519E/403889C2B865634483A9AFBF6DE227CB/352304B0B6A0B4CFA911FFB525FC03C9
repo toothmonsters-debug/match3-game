@@ -1,0 +1,988 @@
+﻿*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --cell-size: 50px;
+    --cell-gap: 4px;
+    --board-pad: 8px;
+    --board-top-ui-space: 90px;
+    --board-width: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
+    --hud-height: clamp(84px, calc(var(--cell-size) * 1.9), 104px);
+    --hud-scale: calc(var(--cell-size) / 50);
+}
+
+html,
+body {
+    overflow-x: hidden;
+}
+
+body {
+    font-family: sans-serif;
+    color: #eee;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+    height: 100dvh;     /* min-height -> height */
+    overflow: hidden;   /* 세로 스크롤바 차단 */
+    background:
+        radial-gradient(circle at center, #2b2f55 0%, #1a1c33 40%, #121320 70%, #0b0c14 100%),
+        repeating-linear-gradient(
+            45deg,
+            rgba(255,255,255,0.02),
+            rgba(255,255,255,0.02) 2px,
+            transparent 2px,
+            transparent 6px
+        );
+}
+
+/* 전체 래퍼 */
+#gameWrap {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+    margin-top: 45px;
+}
+
+/* 보드 + UI 기준 컨테이너 */
+#boardWrap {
+    position: relative;
+    width: var(--board-width);
+    padding-top: calc(var(--hud-height) + 8px);
+}
+
+/* ===== HUD 패널 ===== */
+#hudPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--hud-height);
+    z-index: 12;
+    border-radius: 12px;
+    padding: clamp(6px, calc(var(--cell-size) * 0.18), 10px) 12px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(20,22,40,0.92), rgba(13,14,28,0.92));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "stage stage"
+        "score target"
+        ". time";
+    row-gap: 4px;
+    column-gap: 8px;
+    align-content: center;
+}
+
+#ui-stage,
+#ui-score,
+#ui-target,
+#ui-time {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin: 0;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+}
+
+#ui-stage {
+    grid-area: stage;
+    justify-self: center;
+    font-size: clamp(18px, calc(27px * var(--hud-scale)), 27px); /* 기본크기 유지 */
+    font-weight: 900;
+    color: #f8d23d;
+    text-shadow: 0 0 6px #000;
+
+    transform: scale(1.5);            /* 실제 표시만 2배 */
+    transform-origin: center top;   /* 위 기준 확대 */
+    line-height: 1;
+}
+
+#ui-score {
+    grid-area: score;
+    justify-self: start;
+    font-size: clamp(12px, calc(21px * var(--hud-scale)), 21px);
+    font-weight: 800;
+    transform: translateY(+8px);
+}
+
+#ui-target {
+    grid-area: target;
+    justify-self: end;
+    font-size: clamp(12px, calc(21px * var(--hud-scale)), 21px);
+    transform: translateY(+8px);
+}
+
+#ui-time {
+    grid-area: time;
+    justify-self: end;
+    font-size: clamp(11px, calc(18px * var(--hud-scale)), 18px);
+    transform: translateY(+8px);
+}
+
+/* 콤보 */
+#comboLog {
+    position: absolute;
+    z-index: 22;
+    top: calc(var(--hud-height) + 6px);
+    left: 0;
+    right: 0;
+    text-align: center;
+    min-height: 34px;
+    line-height: 1.2;
+    font-size: clamp(20px, 3.2vw, 32px);
+    font-weight: 900;
+    color: #ffd166;
+    text-shadow: 0 0 6px #000;
+    transition: opacity 1s ease, transform 1s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: visible;
+}
+
+#comboTimerWrap {
+    margin-top: 8px;
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#comboTimerWrap.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#comboTimerBar {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ffffff 0%, #ffd60a 55%, #ff3b30 100%);
+    transform-origin: left center;
+}
+
+/* ===== 보드 ===== */
+#board {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(8, var(--cell-size));
+    grid-template-rows: repeat(8, var(--cell-size));
+    gap: var(--cell-gap);
+    padding: var(--board-pad);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #1c1f3d, #15172c);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+    backdrop-filter: blur(4px);
+    user-select: none;
+}
+
+#board::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.08), transparent 40%);
+    pointer-events: none;
+}
+
+/* ===== 셀 ===== */
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.08s ease;
+    will-change: transform;
+    background: radial-gradient(ellipse 12% 12% at 23% 18%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 1%, rgba(255,255,255,0.0) 100%), var(--block-color);
+}
+
+.cell.bomb {
+    background: #000 !important;
+    outline: 3px solid #c28888;
+    color: #ff0;
+    animation: glowPulse 1.2s infinite ease-in-out;
+}
+
+.cell.cross {
+    background: #000 !important;
+    outline: 3px solid #ffd166;
+    color: #0ff;
+    animation: glowPulse 1.2s infinite ease-in-out;
+}
+
+.cell.explode {
+    transform: translate(var(--ox, 0px), var(--oy, 0px)) scale(1.5);
+    opacity: 0;
+}
+
+.cell.selected {
+    transform: scale(0.9, 1.1);
+    z-index: 2;
+}
+
+.cell.release {
+    animation: jellyRelease 0.22s ease;
+}
+
+.cell .icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    transform: translateY(-3px);
+}
+
+.cell .block-symbol {
+    font-size: 35px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.1);
+    transform: translateY(-3px);
+    pointer-events: none;
+    text-shadow: 0 0 6px rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0);
+}
+
+.cell .block-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    z-index: 1;
+}
+
+/* ===== 게임오버/카운트다운 ===== */
+#countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 15;
+    transform: translate(-50%, -50%);
+    font-size: 64px;
+    font-weight: 900;
+    color: #ff5555;
+    text-shadow: 0 0 10px rgba(255,0,0,0.6);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+#countdown.show {
+    opacity: 1;
+}
+
+#gameOverOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#gameOverOverlay.show {
+    opacity: 1;
+}
+
+#gameOverOverlay .go-title {
+    font-size: clamp(34px, calc(var(--board-width) * 0.12), 64px);
+    font-weight: 900;
+    color: #ff5555;
+    text-shadow: 0 0 12px rgba(255,0,0,0.7);
+    margin-bottom: 12px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+#gameOverOverlay .go-score {
+    font-size: clamp(18px, calc(var(--board-width) * 0.05), 28px);
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+
+#gameOverOverlay .go-maxcombo {
+    margin-top: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffd166;
+    display: none;
+    text-shadow: 0 0 6px #000;
+}
+
+#gameOverOverlay .go-maxcombo.show {
+    display: block;
+}
+
+/* ===== 상점 오버레이 ===== */
+#shopOpenBtn {
+    position: absolute;
+    left: 50%;
+    top: 66%;
+    transform: translateX(-50%);
+    z-index: 35;
+    display: none;
+    padding: 16px 22px;
+    border: none;
+    border-radius: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    background: linear-gradient(180deg, #ffd166, #d9a62f);
+    color: #2b1d00;
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.5);
+    line-height: 1.15;
+    text-align: center;
+    font-size: 32px;
+}
+
+#shopOpenBtn small {
+    display: block;
+    margin-top: 6px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #3a2a00;
+}
+
+#shopOpenBtn.show {
+    display: inline-block;
+}
+
+#shopOverlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--board-top-ui-space);
+    height: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
+    z-index: 10001;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+#shopOverlay.show {
+    display: flex;
+}
+
+#shopPanel {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: calc(100% - 56px);
+    min-height: 0;
+    padding: 10px;
+    background: #0e0e0e;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 200, 100, 0.2);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.shop-header {
+    font-weight: 900;
+    font-size: 20px;
+    margin-bottom: 6px;
+    text-align: center;
+    color: #ffd166;
+    text-shadow: 0 0 6px #000;
+}
+
+.shop-grid {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    gap: 8px;
+    align-content: stretch;
+    overflow: hidden;
+}
+
+.shop-item {
+    background: linear-gradient(180deg, #202020, #111);
+    border: 1px solid #3b3b3b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.shop-item:hover {
+    border-color: #ffd166;
+    box-shadow:
+        0 0 10px rgba(255, 209, 102, 0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.shop-title {
+    grid-area: title;
+    min-width: 0;
+    font-weight: 900;
+    font-size: clamp(11px, 1.9vw, 15px);
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.55), 0 0 4px rgba(255,255,255,0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 8px;
+}
+
+.shop-desc {
+    grid-area: desc;
+    min-width: 0;
+    font-weight: 700;
+    font-size: clamp(10px, 1.6vw, 12px);
+    color: #c6c6c6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 8px;
+}
+
+.shop-preview {
+    grid-area: preview;
+    min-width: 0;
+    font-weight: 800;
+    font-size: clamp(10px, 1.7vw, 13px);
+    color: #8fe9ff;
+    text-align: right;
+    text-shadow: 0 0 5px rgba(123,223,242,0.25);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+
+.shop-price {
+    grid-area: price;
+    min-width: 0;
+    background: linear-gradient(180deg, #0d0d0d, #050505);
+    border: 1px solid #2f2a1a;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-weight: 900;
+    font-size: clamp(10px, 1.7vw, 13px);
+    text-align: right;
+    color: #ffd166;
+    text-shadow: 0 0 6px rgba(255,209,102,0.35);
+    box-shadow: inset 0 0 8px rgba(255,209,102,0.12);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.shop-item.disabled {
+    background: linear-gradient(180deg, #1a1a1a, #121212) !important;
+    border-color: #4a4a4a !important;
+    filter: grayscale(0.55);
+    opacity: 0.72;
+    box-shadow: none !important;
+}
+
+.shop-item.disabled .shop-title {
+    color: #e6e6e6 !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-desc {
+    color: #b8b8b8 !important;
+}
+
+.shop-item.disabled .shop-preview {
+    color: #c9d7dd !important;
+    text-shadow: none !important;
+}
+
+.shop-item.disabled .shop-price {
+    color: #d8d8d8 !important;
+    border-color: #555 !important;
+    background: linear-gradient(180deg, #171717, #101010) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+#shopCloseBtn {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    background: #2a2a2a;
+    color: #fff;
+}
+
+/* ===== 사운드 패널 ===== */
+#soundPanel {
+    margin-top: 5px;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 12px;
+    background: #111;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+.sound-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    font-size: 14px;
+}
+
+.sound-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+#muteBtn {
+    width: 52px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+#resetProgressBtn {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: none;
+    background: #3a1e1e;
+    color: #ffdede;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+#resetProgressBtn:hover {
+    background: #5a2a2a;
+}
+
+/* ===== 기타 ===== */
+#gameGuide {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+}
+
+#gameGuide div {
+    margin-bottom: 4px;
+}
+
+.floatText {
+    position: absolute;
+    color: #fff;
+    font-weight: 900;
+    font-size: 22px;
+    text-shadow: 0 0 4px #000, 0 0 8px #000;
+    pointer-events: none;
+    transition: all 1s ease;
+    z-index: 60;
+}
+
+.floatText--x2 {
+    font-size: 28px;
+    font-weight: 900;
+    text-shadow: 0 0 6px #000, 0 0 14px rgba(123, 223, 242, 0.9);
+    letter-spacing: 0.5px;
+    filter: saturate(1.2);
+}
+
+#board.shake {
+    animation: shake 0.2s infinite;
+}
+
+#effectLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+}
+
+#stageBanner {
+    position: absolute;
+    z-index: 20;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    font-size: 28px;
+    font-weight: 900;
+    color: #ffd166;
+    text-shadow: 0 0 6px #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+#stageBanner.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 리스타트 버튼 */
+#restart {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px 0;
+    font-size: 20px;
+    font-weight: 900;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(180deg, #ff6b6b, #c92a2a);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 80, 80, 0.5);
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1001;
+}
+
+#restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 80, 80, 0.8);
+}
+
+#restart:active {
+    transform: translateY(0);
+}
+
+#gameWrap.gameover #restart {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#gameWrap.playing #restart {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#board,
+.cell {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html.board-drag-lock,
+body.board-drag-lock {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    touch-action: none;
+}
+
+/* ===== 스크롤/상하 이동 완전 차단 ===== */
+@media (max-width: 600px) {
+    html,
+    body {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden !important;
+        overscroll-behavior-y: none;
+        touch-action: none;
+    }
+
+    #gameWrap {
+        height: 100dvh;
+        overflow: hidden;
+        margin-top: 0; /* 작은 화면에서 위 여백으로 인한 스크롤 방지 */
+    }
+}
+
+/* ===== 애니메이션 ===== */
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5); }
+    50% { box-shadow: 0 0 14px #ff0, 0 0 32px rgba(255,255,0,0.9); }
+    100% { box-shadow: 0 0 6px #ff0, 0 0 12px rgba(255,255,0,0.5); }
+}
+
+@keyframes jellyRelease {
+    0% { transform: scale(0.9,1.1); }
+    50% { transform: scale(1.06,0.94); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, 0); }
+    50% { transform: translate(2px, 0); }
+    75% { transform: translate(0, -2px); }
+    100% { transform: translate(0, 2px); }
+}
+
+@keyframes goExplode {
+    from {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.3) rotate(20deg) translateY(20px);
+        opacity: 0;
+    }
+}
+
+.cell.gameover-explode {
+    animation: goExplode 0.25s ease forwards;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+    body {
+        padding: 10px;
+    }
+
+    #gameWrap {
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --cell-gap: 3px;
+        --board-pad: 6px;
+        --board-top-ui-space: 74px;
+        --cell-size: min(
+            42px,
+            calc((100vw - 16px - (2 * var(--board-pad)) - (7 * var(--cell-gap))) / 8)
+        );
+        /* --hud-height는 root의 clamp 계산값 사용 (여기서 재정의하지 않음) */
+    }
+
+    html, body {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden !important;
+        overscroll-behavior-y: none;
+        touch-action: none;
+    }
+
+    body { padding: 8px; }
+
+    #gameWrap {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden;
+        margin-top: 0;
+        gap: 10px;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    #boardWrap {
+        width: min(var(--board-width), calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+    }
+
+    #comboLog {
+        top: calc(var(--hud-height) + 4px);
+        min-height: 28px;
+        font-size: clamp(16px, 5.2vw, 22px);
+    }
+
+    #restart {
+        font-size: 17px;
+        padding: 12px 0;
+    }
+
+    .cell .icon { font-size: 30px; }
+    .cell .block-symbol { font-size: 26px; }
+}
+
+/* ✅ 시작 가이드 오버레이 */
+#startGuideOverlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--hud-height);
+    bottom: 0;
+    z-index: 70;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(8, 10, 20, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+#startGuideOverlay.show {
+    display: flex;
+}
+
+#startGuideOverlay .guide-card {
+    width: min(92%, 420px);
+    border-radius: 14px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, rgba(25,30,55,0.96), rgba(14,17,35,0.96));
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45), 0 0 14px rgba(255, 209, 102, 0.22);
+}
+
+#startGuideOverlay .guide-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight: 900;
+    color: #ffd166;
+    text-align: center;
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+}
+
+#startGuideOverlay .guide-card ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+#startGuideOverlay .guide-card li {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #f0f4ff;
+    text-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* 오버레이 최상단 */
+#startGuideOverlay {
+    z-index: 999;
+    overflow: visible;
+}
+
+/* 타이틀: 메뉴얼 카드와 분리, 상단 20% */
+#startGuideOverlay .guide-title {
+    position: absolute;
+    top:0%;
+    left: 50%;
+    z-index: 990;
+    transform: translateX(-50%); /* 부모는 회전 없음 */
+    transform-origin: center;
+    text-align: center;
+    line-height: 0.92;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#startGuideOverlay .guide-title .line1,
+#startGuideOverlay .guide-title .line2 {
+    display: block;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #ffd166;
+    text-shadow:
+        0 2px 0 #7a4e00,
+        0 0 10px rgba(255, 209, 102, 0.95),
+        0 0 18px rgba(255, 120, 80, 0.5);
+    transform-origin: left center;
+}
+
+/* 99콤보가: 왼쪽이 살짝 올라가게 (약 5도) */
+#startGuideOverlay .guide-title .line1 {
+    font-size: clamp(40px, 6.2vw, 64px);
+    transform: rotate(5deg) translateX(-8px);
+}
+
+/* 하고싶어!!: 왼쪽이 내려가게 (약 15도), 더 오른쪽 배치 */
+    #startGuideOverlay .guide-title .line2 {
+        font-size: clamp(40px, 6.8vw, 64px);
+        margin-top: 4px;
+        transform: rotate(-10deg) translateX(85px);
+        position: absolute;
+        top: 170%;
+    }
+
+/* 99만 더 크게 */
+#startGuideOverlay .guide-title .num99 {
+    font-size: clamp(68px, 10.5vw, 118px);
+    line-height: 0.8;
+    vertical-align: -0.06em;
+    margin-right: 2px;
+}
+
+/* 게임오버 제목 전용 표시 모드 */
+#startGuideOverlay.title-only {
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none;
+}
+
+#startGuideOverlay.title-only .guide-card {
+    display: none;
+}
+
+#startGuideOverlay.title-only .guide-title {
+    top: -3%;
+}
+
+/* 시작 가이드(제목 포함) 페이드아웃 */
+#startGuideOverlay.fade-out {
+    animation: startGuideFadeOut 0.4s ease forwards;
+}
+
+@keyframes startGuideFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
