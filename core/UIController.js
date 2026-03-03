@@ -16,6 +16,7 @@ export class UIController {
         this.shopOpenBtn = document.getElementById("shopOpenBtn");
         this.shopCloseBtn = document.getElementById("shopCloseBtn");
         this.shopOverlayEl = document.getElementById("shopOverlay");
+        this.startGuideEl = document.getElementById("startGuideOverlay");
 
         this._stageBannerTimer = null;
     }
@@ -239,5 +240,15 @@ export class UIController {
     closeShopOverlay() {
         if (!this.shopOverlayEl) return;
         this.shopOverlayEl.classList.remove("show");
+    }
+
+    showStartGuide() {
+        if (!this.startGuideEl) return;
+        this.startGuideEl.classList.add("show");
+    }
+
+    hideStartGuide() {
+        if (!this.startGuideEl) return;
+        this.startGuideEl.classList.remove("show");
     }
 }

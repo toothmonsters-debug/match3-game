@@ -29,12 +29,8 @@ export class BoardController {
         this.comboAccum = 0;
         this.comboTimer = null;
         this.comboTimeoutMs = 1800;
-
-        // 추가: 게임 전체에서 기록할 최대 콤보
         this.maxCombo = 0;
     }
-
-    /* ================= Board Init ================= */
 
     randColor() { return Math.floor(Math.random() * COLORS.length); }
     makeCell() { return { color: this.randColor(), special: null }; }
@@ -53,6 +49,65 @@ export class BoardController {
         this.comboAccum = 0;
         this.maxCombo = 0;
         if (this.comboTimer) { clearTimeout(this.comboTimer); this.comboTimer = null; }
+    }
+
+    initBoardEmpty(onMouseDown) {
+        this.renderer.init(onMouseDown);
+
+        const empty = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+        this.boardModel.set(empty);
+        this.render();
+
+        this.combo = 0;
+        this.comboAccum = 0;
+        this.maxCombo = 0;
+        if (this.comboTimer) {
+            clearTimeout(this.comboTimer);
+            this.comboTimer = null;
+        }
+    }
+
+    async initBoardAnimated(onMouseDown, totalMs = 1600) {
+        this.renderer.init(onMouseDown);
+
+        const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+        this.boardModel.set(board);
+        this.render();
+
+        const rowIntervalMs = 200; // ✅ 한 줄마다 0.2초 간격
+        const maxFallSteps = SIZE; // 최하단까지 최대 8스텝
+        const fallStepMs = Math.max(10, Math.floor((totalMs / SIZE) / maxFallSteps));
+
+        // 바닥부터 쌓이게: targetRow 7 -> 0
+        for (let targetRow = SIZE - 1; targetRow >= 0; targetRow--) {
+            const rowCells = Array.from({ length: SIZE }, () => this.makeCell());
+
+            // 맨 위에서 시작해 targetRow까지 한 줄이 같이 떨어짐
+            let r = 0;
+            for (let c = 0; c < SIZE; c++) board[r][c] = rowCells[c];
+            this.render();
+
+            while (r < targetRow) {
+                for (let c = 0; c < SIZE; c++) board[r][c] = null;
+                r++;
+                for (let c = 0; c < SIZE; c++) board[r][c] = rowCells[c];
+                this.render();
+                await sleep(fallStepMs);
+            }
+
+            // 줄 간격(0.2초) 보장
+            await sleep(rowIntervalMs);
+        }
+
+        await this.resolveBoard({ value: 0 });
+
+        this.combo = 0;
+        this.comboAccum = 0;
+        this.maxCombo = 0;
+        if (this.comboTimer) {
+            clearTimeout(this.comboTimer);
+            this.comboTimer = null;
+        }
     }
 
     /* ================= Rendering ================= */
@@ -86,7 +141,7 @@ export class BoardController {
         this.boardEl.appendChild(d);
         d.getBoundingClientRect();
 
-        // 0.15초 후 원래 크기
+        // 0.1초 후 원래 크기
         setTimeout(() => {
             d.style.transform = "translateY(0px) scale(1)";
         }, 100);
@@ -98,7 +153,7 @@ export class BoardController {
             d.style.opacity = "0";
         }, 300);
 
-        setTimeout(() => d.remove(), 900);
+        setTimeout(() => d.remove(), 800);
     }
 
     /* ================= Core Logic ================= */

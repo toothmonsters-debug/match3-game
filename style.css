@@ -797,6 +797,116 @@ body.board-drag-lock {
     .cell .block-symbol { font-size: 26px; }
 }
 
+/* ✅ 시작 가이드 오버레이 */
+#startGuideOverlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--hud-height);
+    bottom: 0;
+    z-index: 70;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(8, 10, 20, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+#startGuideOverlay.show {
+    display: flex;
+}
+
+#startGuideOverlay .guide-card {
+    width: min(92%, 420px);
+    border-radius: 14px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, rgba(25,30,55,0.96), rgba(14,17,35,0.96));
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45), 0 0 14px rgba(255, 209, 102, 0.22);
+}
+
+#startGuideOverlay .guide-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight: 900;
+    color: #ffd166;
+    text-align: center;
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+}
+
+#startGuideOverlay .guide-card ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+#startGuideOverlay .guide-card li {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #f0f4ff;
+    text-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* 오버레이 최상단 */
+#startGuideOverlay {
+    z-index: 999;
+    overflow: visible;
+}
+
+/* 타이틀: 메뉴얼 카드와 분리, 상단 20% */
+#startGuideOverlay .guide-title {
+    position: absolute;
+    top:0%;
+    left: 50%;
+    z-index: 990;
+    transform: translateX(-50%); /* 부모는 회전 없음 */
+    transform-origin: center;
+    text-align: center;
+    line-height: 0.92;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#startGuideOverlay .guide-title .line1,
+#startGuideOverlay .guide-title .line2 {
+    display: block;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #ffd166;
+    text-shadow:
+        0 2px 0 #7a4e00,
+        0 0 10px rgba(255, 209, 102, 0.95),
+        0 0 18px rgba(255, 120, 80, 0.5);
+    transform-origin: left center;
+}
+
+/* 99콤보가: 왼쪽이 살짝 올라가게 (약 5도) */
+#startGuideOverlay .guide-title .line1 {
+    font-size: clamp(40px, 6.2vw, 64px);
+    transform: rotate(5deg) translateX(-8px);
+}
+
+/* 하고싶어!!: 왼쪽이 내려가게 (약 15도), 더 오른쪽 배치 */
+    #startGuideOverlay .guide-title .line2 {
+        font-size: clamp(40px, 6.8vw, 64px);
+        margin-top: 4px;
+        transform: rotate(-10deg) translateX(85px);
+        position: absolute;
+        top: 170%;
+    }
+
+/* 99만 더 크게 */
+#startGuideOverlay .guide-title .num99 {
+    font-size: clamp(68px, 10.5vw, 118px);
+    line-height: 0.8;
+    vertical-align: -0.06em;
+    margin-right: 2px;
+}
+
 
 
 

@@ -153,12 +153,15 @@ export class Game {
             });
         }
 
-        this.initBoard();
+        this.boardCtrl.initBoardEmpty((e, r, c) => this.inputCtrl.onMouseDown(e, r, c));
         this.syncStats();
         this.updateHUD();
         
         // constructor 안, 상태값 추가
         this.lastGainedPoints = 0;
+
+        // constructor 마지막 근처 (초기 상태에서 표시)
+        this.ui.showStartGuide();
     }
 
     async _playStartCountdown() {
@@ -196,7 +199,6 @@ export class Game {
             this.started = false;
             this.isGameOver = false;
 
-            // ✅ 추가: 상점 UI 강제 초기화
             this.isShopOpen = false;
             this.ui.closeShopOverlay();
             this.ui.hideShopOpenButton();
@@ -204,17 +206,21 @@ export class Game {
             this.ui.hideGameOver();
             document.getElementById("gameWrap").classList.remove("gameover");
 
+            // ✅ 시작 클릭 후 1초 뒤 가이드 숨김
+            setTimeout(() => this.ui.hideStartGuide(), 1000);
+
             this.score = 0;
             this.stage = 1;
             this.stageRequirement = this.baseStageScore;
             this.targetScore = this.stageRequirement;
             this.updateHUD();
 
-            if (!this.boardEl.children.length) {
-                this.initBoard();
-            }
-
+            const fillPromise = this.boardCtrl.initBoardAnimated(
+                (e, r, c) => this.inputCtrl.onMouseDown(e, r, c),
+                1600
+            );
             await this._playStartCountdown();
+            await fillPromise;
 
             playBgm();
             this.started = true;
@@ -234,7 +240,6 @@ export class Game {
             this.started = false;
             this.isGameOver = false;
 
-            // ✅ 추가: 상점 UI 강제 초기화
             this.isShopOpen = false;
             this.ui.closeShopOverlay();
             this.ui.hideShopOpenButton();
@@ -255,9 +260,13 @@ export class Game {
 
             this.syncStats();
             this.updateHUD();
-            this.initBoard();
 
+            const fillPromise = this.boardCtrl.initBoardAnimated(
+                (e, r, c) => this.inputCtrl.onMouseDown(e, r, c),
+                1600
+            );
             await this._playStartCountdown();
+            await fillPromise;
 
             playBgm();
             this.started = true;
