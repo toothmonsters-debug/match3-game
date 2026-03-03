@@ -57,8 +57,8 @@ export class InputController {
     // 셀 pointerdown / mousedown 진입점
     onMouseDown(e, r, c) {
         // 게임 중이 아니면 입력 무시
-        const { isGameOver, started } = this.getState();
-        if (isGameOver || !started) return;
+        const { isGameOver, started, isBusy } = this.getState();
+        if (isGameOver || !started || isBusy) return;
 
         if (e.cancelable) e.preventDefault();
 
@@ -151,6 +151,14 @@ export class InputController {
             // ✅ 여기 추가
             this.boardCtrl.clearInsertPreview();
 
+            // 입력 잠금은 분기 리턴 전에 즉시 해제 (탭 경로 return 대응)
+            if (pointerId !== null && this._activePointerId === pointerId) {
+                this._activePointerId = null;
+            }
+            if (pointerId === null) {
+                this._activePointerId = null;
+            }
+
             // 종료 시점 기준 최종 step 계산
             const pt = this._getClientPoint(ev);
             const delta = axis === "h" ? (pt.x - startX) : (pt.y - startY);
@@ -221,10 +229,6 @@ export class InputController {
                 this.boardCtrl.render();
             }
 
-            // onUp 내부 마지막(리스너/캡처/스크롤 해제 이후 아무 위치) 추가
-            if (pointerId !== null && this._activePointerId === pointerId) {
-                this._activePointerId = null;
-            }
         };
 
         // 전역 리스너 등록
