@@ -1,19 +1,19 @@
-// JavaScript source code
+ï»¿// JavaScript source code
 //
 export class GameConfig {
     constructor(upgrades) {
         this.upgrades = upgrades || { levels: {} };
     }
 
-    // ±âº» 3¸ÅÄ¡ Á¡¼ö (¾÷±×·¹ÀÌµå ¹İ¿µ)
+    // ê¸°ë³¸ 3ë§¤ì¹˜ ì ìˆ˜ (ì—…ê·¸ë ˆì´ë“œ ë°˜ì˜)
     getBase3() {
         const base3 = 100;
-        const baseBonusPerLevel = 50;
+        const baseBonusPerLevel = 100;
         const lvl = this.upgrades.levels?.baseScore || 0;
         return base3 + lvl * baseBonusPerLevel;
     }
 
-    // ¸ÅÄ¡ ½Â¼ö
+    // ë§¤ì¹˜ ìŠ¹ìˆ˜
     getMatchMultiplier(removedTotal) {
         if (removedTotal >= 6) return 3.0;
         if (removedTotal === 5) return 2.0;
@@ -21,21 +21,28 @@ export class GameConfig {
         return 1.0;
     }
 
-    // ÄŞº¸ °ü·Ã
+    // ì½¤ë³´ ê´€ë ¨
     getComboBase() { return 50; }
-    getComboPerLevel() { return 15; }
+    getComboPerLevel() { return 20; }
     getComboPerCount() {
         const lvl = this.upgrades.levels?.comboScore || 0;
         return this.getComboBase() + lvl * this.getComboPerLevel();
     }
 
-    // Æ¯¼ö ±âº»°ª ¹× ¾÷±×·¹ÀÌµå ´ÜÀ§
+    // íŠ¹ìˆ˜ ê¸°ë³¸ê°’ ë° ì—…ê·¸ë ˆì´ë“œ ë‹¨ìœ„
     getBombBase() { return 200; }
     getCrossBase() { return 200; }
     getBombPerLevel() { return 300; }
     getCrossPerLevel() { return 300; }
 
-    // ½Ã°£ °ü·Ã
+    // ì‹œê°„ ê´€ë ¨
     getTimeBase() { return 60; }
     getTimePerLevel() { return 2; }
+
+    // âœ… ì½¤ë³´ ìœ ì§€ì‹œê°„ ì—…ê·¸ë ˆì´ë“œìš©
+    getComboKeepBaseMs() { return 1500; } // 1.5ì´ˆ
+    getComboKeepPerLevelMs() { return 100; } // +0.1ì´ˆ
+
+    // âœ… ì½¤ë³´ í…ìŠ¤íŠ¸ ê¸°ë³¸ í‘œì‹œ ì‹œê°„ë„ Configì—ì„œ ê´€ë¦¬
+    getComboPopupBaseMs() { return this.getComboKeepBaseMs(); }
 }

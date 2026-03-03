@@ -19,6 +19,11 @@ export class UIController {
         this.startGuideEl = document.getElementById("startGuideOverlay");
 
         this._stageBannerTimer = null;
+        this._startGuideFadeTimer = null;
+    }
+
+    _formatComma(value) {
+        return Number(value || 0).toLocaleString("ko-KR");
     }
 
     bindRestart(handler) {
@@ -48,9 +53,9 @@ export class UIController {
     }
 
     updateHUD({ score, stage, targetScore }) {
-        if (this.scoreEl) this.scoreEl.textContent = score;
+        if (this.scoreEl) this.scoreEl.textContent = this._formatComma(score);
         if (this.stageEl) this.stageEl.textContent = stage;
-        if (this.targetEl) this.targetEl.textContent = targetScore;
+        if (this.targetEl) this.targetEl.textContent = this._formatComma(targetScore);
     }
 
     updateTime(timeLeft) {
@@ -77,39 +82,48 @@ export class UIController {
         this.countdownEl.classList.remove("show");
     }
 
-    showBigPopup(text) {
+    _parseCssTimeMs(value) {
+        if (!value) return 0;
+        const v = value.trim();
+        if (v.endsWith("ms")) return parseFloat(v);
+        if (v.endsWith("s")) return parseFloat(v) * 1000;
+        return 0;
+    }
+
+    showBigPopup(text, visibleMs = this.scoreSystem?.cfg?.getComboPopupBaseMs?.() ?? 1500) {
         const log = document.getElementById("comboLog");
         if (!log) return;
 
-        // 텍스트 갱신
         log.textContent = text;
-
-        // 즉시 선명하게
         log.style.opacity = "1";
         log.style.transform = "translateY(0)";
 
-        // 이전 페이드 타이머 있으면 취소
         if (this._comboFadeTimer) {
             clearTimeout(this._comboFadeTimer);
         }
 
-        // 일정 시간 후 서서히 사라지게
+        // comboLog CSS transition 시간(첫 번째 duration)을 읽어서
+        // "페이드 완료 시점 = visibleMs"가 되도록 역산
+        const cs = getComputedStyle(log);
+        const firstDuration = (cs.transitionDuration || "1s").split(",")[0];
+        const fadeMs = this._parseCssTimeMs(firstDuration) || 1000;
+
+        const startFadeAfter = Math.max(0, visibleMs - fadeMs);
+
         this._comboFadeTimer = setTimeout(() => {
             log.style.opacity = "0";
             log.style.transform = "translateY(-6px)";
-        }, 1500); // ← 유지 시간 (원하면 1200~2000 사이로 조절)
+        }, startFadeAfter);
     }
 
 
     showGameOver(score, gainedPoints = 0, maxCombo = 0) {
         if (!this.gameOverOverlayEl) return;
 
-        // 기존 점수 텍스트
         if (this.gameOverScoreEl) {
-            this.gameOverScoreEl.textContent = `SCORE : ${score}`;
+            this.gameOverScoreEl.textContent = `SCORE : ${this._formatComma(score)}`;
         }
 
-        // 최대 콤보 표시용 엘리먼트가 없으면 생성 (스타일은 CSS로 처리)
         let maxComboEl = this.gameOverOverlayEl.querySelector(".go-maxcombo");
         if (!maxComboEl) {
             maxComboEl = document.createElement("div");
@@ -118,13 +132,12 @@ export class UIController {
         }
 
         if (maxCombo > 0) {
-            maxComboEl.textContent = `MAX COMBO: ${maxCombo}`;
+            maxComboEl.textContent = `MAX COMBO: ${this._formatComma(maxCombo)}`;
             maxComboEl.classList.add("show");
         } else {
             maxComboEl.classList.remove("show");
         }
 
-        // 기존 overlay 노출
         this.gameOverOverlayEl.classList.add("show");
     }
 
@@ -191,10 +204,18 @@ export class UIController {
                 previewValue = this.scoreSystem.calcComboBonus(1);
             }
             else if (key === "timeBonus") {
-                // 시간은 GameConfig 기반으로 표시하도록 변경
+                // 시간은 GameConfig 기반으로 표시하도록 변화
                 const lv = upgrades.getLevel("timeBonus");
                 const cfg = this.scoreSystem.cfg;
                 previewValue = cfg.getTimeBase() + lv * cfg.getTimePerLevel();
+            }
+            // comboKeep 분기 교체
+            else if (key === "comboKeep") {
+                const lv = upgrades.getLevel("comboKeep");
+                const cfg = this.scoreSystem.cfg;
+                previewValue = ((cfg.getComboKeepBaseMs() + lv * cfg.getComboKeepPerLevelMs()) / 1000)
+                    .toFixed(3)
+                    .replace(/\.?0+$/, "");
             }
 
             if (previewEl) previewEl.textContent = previewValue;
@@ -244,11 +265,38 @@ export class UIController {
 
     showStartGuide() {
         if (!this.startGuideEl) return;
+        this.startGuideEl.classList.remove("title-only");
         this.startGuideEl.classList.add("show");
     }
 
     hideStartGuide() {
         if (!this.startGuideEl) return;
         this.startGuideEl.classList.remove("show");
+        this.startGuideEl.classList.remove("title-only");
+    }
+
+    showGameTitleOnly() {
+        if (!this.startGuideEl) return;
+        this.startGuideEl.classList.add("show");
+        this.startGuideEl.classList.add("title-only");
+    }
+
+    // 메서드 추가
+    hideStartGuideWithFade(durationMs = 400) {
+        if (!this.startGuideEl) return;
+
+        this.startGuideEl.classList.remove("fade-out");
+        // reflow로 애니메이션 재시작 보장
+        void this.startGuideEl.offsetWidth;
+        this.startGuideEl.classList.add("fade-out");
+
+        if (this._startGuideFadeTimer) {
+            clearTimeout(this._startGuideFadeTimer);
+        }
+
+        this._startGuideFadeTimer = setTimeout(() => {
+            this.hideStartGuide();
+            this.startGuideEl.classList.remove("fade-out");
+        }, durationMs);
     }
 }

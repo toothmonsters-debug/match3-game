@@ -358,7 +358,7 @@ body {
     right: 0;
     top: var(--board-top-ui-space);
     height: calc(8 * var(--cell-size) + 7 * var(--cell-gap) + (2 * var(--board-pad)));
-    z-index: 45;
+    z-index: 10001;
     display: none;
     flex-direction: column;
     align-items: center;
@@ -905,6 +905,31 @@ body.board-drag-lock {
     line-height: 0.8;
     vertical-align: -0.06em;
     margin-right: 2px;
+}
+
+/* 게임오버 제목 전용 표시 모드 */
+#startGuideOverlay.title-only {
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none;
+}
+
+#startGuideOverlay.title-only .guide-card {
+    display: none;
+}
+
+#startGuideOverlay.title-only .guide-title {
+    top: -5%;
+}
+
+/* 시작 가이드(제목 포함) 페이드아웃 */
+#startGuideOverlay.fade-out {
+    animation: startGuideFadeOut 0.4s ease forwards;
+}
+
+@keyframes startGuideFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }
 
 

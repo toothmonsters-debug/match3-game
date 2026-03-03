@@ -85,8 +85,8 @@ export class Game {
                 this.score = total;
                 this.updateHUD();
             },
-            onComboPopup: (text) => {
-                this.ui.showBigPopup(text);
+            onComboPopup: (text, visibleMs) => {
+                this.ui.showBigPopup(text, visibleMs);
             },
             onStageCheck: () => {
                 this.checkStageProgress();
@@ -249,6 +249,9 @@ export class Game {
             document.getElementById("gameWrap").classList.remove("gameover");
             document.getElementById("gameWrap").classList.remove("playing");
 
+            // restart() 초반, gameover/playing 클래스 제거 직후에 추가
+            this.ui.hideStartGuideWithFade(400);
+
             this.boardEl.querySelectorAll(".cell").forEach(d => {
                 d.classList.remove("gameover-explode");
             });
@@ -351,6 +354,8 @@ export class Game {
         this.ui.showGameOver(this.score, gainedPoints, maxCombo);
         this.ui.showShopOpenButton(this.lastGainedPoints);
         this.ui.setRestartLabel("다시 시작");
+
+        this.ui.showGameTitleOnly();
     }
 
     checkStageProgress() {

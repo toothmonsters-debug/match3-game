@@ -28,8 +28,13 @@ export class BoardController {
         this.combo = 0;
         this.comboAccum = 0;
         this.comboTimer = null;
-        this.comboTimeoutMs = 1800;
         this.maxCombo = 0;
+    }
+
+    getComboTimeoutMs() {
+        const cfg = this.scoreSystem.cfg;
+        const lv = this.scoreSystem.upgrades?.levels?.comboKeep || 0;
+        return cfg.getComboKeepBaseMs() + lv * cfg.getComboKeepPerLevelMs();
     }
 
     randColor() { return Math.floor(Math.random() * COLORS.length); }
@@ -190,8 +195,6 @@ export class BoardController {
 
     _bumpCombo() {
         this.combo++;
-
-        // 새: 최대 콤보 갱신
         this.maxCombo = Math.max(this.maxCombo, this.combo);
 
         if (this.comboTimer) clearTimeout(this.comboTimer);
@@ -200,7 +203,7 @@ export class BoardController {
             this.combo = 0;
             this.comboAccum = 0;
             this.comboTimer = null;
-        }, this.comboTimeoutMs);
+        }, this.getComboTimeoutMs());
     }
 
     // 외부에서 최대 콤보 조회 가능하도록 추가
@@ -327,14 +330,18 @@ export class BoardController {
 
         this.comboAccum += comboBonus;
 
+        // removeCells() 하단 팝업 호출부 교체
         if (this.combo > 0) {
             playSfx("combo");
             if (this.onComboPopup) {
-                this.onComboPopup(`🔥 ${this.combo} COMBO! +${this.comboAccum}`);
+                this.onComboPopup(
+                    `🔥 ${this.combo.toLocaleString("ko-KR")} COMBO! +${this.comboAccum.toLocaleString("ko-KR")}`,
+                    this.getComboTimeoutMs()
+                );
             }
         } else {
             if (this.onComboPopup) {
-                this.onComboPopup(`+${gain}`);
+                this.onComboPopup(`+${gain.toLocaleString("ko-KR")}`, this.scoreSystem.cfg.getComboPopupBaseMs());
             }
         }
 
