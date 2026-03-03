@@ -11,6 +11,7 @@
 	<div id="gameWrap">
 		<div id="boardWrap">
 			<div id="hudPanel">
+				<button id="pauseBtn" type="button" aria-label="일시정지">⏸</button>
 				<div id="ui-stage">STAGE <span id="stage">1</span></div>
 				<div id="ui-score">점수: <span id="score">0</span></div>
 				<div id="ui-target">목표점수: <span id="target">10000</span></div>
@@ -44,6 +45,12 @@
 			<div id="gameOverOverlay">
 				<div class="go-title">GAME OVER</div>
 				<div class="go-score"></div>
+			</div>
+
+			<div id="pauseOverlay">
+				<div class="pause-title">일시정지</div>
+				<div class="pause-countdown" id="pauseCountdown"></div>
+				<button id="pauseResumeBtn" type="button">계속</button>
 			</div>
 
 			<button id="shopOpenBtn" type="button">상점 열기 (P: 0)</button>
@@ -109,6 +116,21 @@
 				</div>
 				<button id="muteBtn">🔊</button>
 				<button id="resetProgressBtn" type="button">초기화</button>
+			</div>
+
+			<button id="rankingBtn" type="button">랭킹
+				<span id="rankingNewBadge">NEW</span>
+			</button>
+
+			<div id="rankingOverlay">
+				<div class="ranking-panel">
+					<div class="ranking-tabs">
+						<button id="rankTabScore" type="button" class="active">점수 랭킹</button>
+						<button id="rankTabCombo" type="button">콤보 랭킹</button>
+					</div>
+					<div id="rankingList"></div>
+					<button id="rankingCloseBtn" type="button">닫기</button>
+				</div>
 			</div>
 
 		</div>

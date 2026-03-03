@@ -57,8 +57,8 @@ export class InputController {
     // 셀 pointerdown / mousedown 진입점
     onMouseDown(e, r, c) {
         // 게임 중이 아니면 입력 무시
-        const { isGameOver, started } = this.getState();
-        if (isGameOver || !started) return;
+        const { isGameOver, started, isPaused } = this.getState();
+        if (isGameOver || !started || isPaused) return;
 
         if (e.cancelable) e.preventDefault();
 

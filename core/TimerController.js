@@ -21,6 +21,10 @@ export class TimerController {
 
         if (this.onTick) this.onTick(this._timeLeft);
 
+        this._startInterval();
+    }
+
+    _startInterval() {
         this._timer = setInterval(async () => {
             if (!this._running) return;
 
@@ -36,6 +40,22 @@ export class TimerController {
                 if (this.onTimeout) await this.onTimeout();
             }
         }, 1000);
+    }
+
+    pause() {
+        if (!this._running) return;
+        if (this._timer) {
+            clearInterval(this._timer);
+            this._timer = null;
+        }
+        this._running = false;
+    }
+
+    resume() {
+        if (this._running || this._timeLeft <= 0) return;
+        this._running = true;
+        if (this.onTick) this.onTick(this._timeLeft);
+        this._startInterval();
     }
 
     stop() {

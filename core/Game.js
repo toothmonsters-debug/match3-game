@@ -11,6 +11,7 @@ import {
     playSfx,
     playBgm,
     stopBgm,
+    fadeBgmTo,
     setMasterVolume,
     toggleMute
 } from "../audio/Sfx.js";
@@ -28,6 +29,12 @@ export class Game {
         this.started = false;
         this.isPreparingStart = false;
         this.isShopOpen = false;
+        this.isPaused = false;
+        this._pauseTransition = false;
+        this.isRankingOpen = false;
+        this.rankings = { scoreTop10: [], comboTop10: [] };
+        this._latestRankEntryId = null;
+        this._hasNewRank = false;
 
         // DOM
         this.boardEl = document.getElementById("board");
@@ -103,7 +110,7 @@ export class Game {
 
         this.inputCtrl = new InputController({
             boardCtrl: this.boardCtrl,
-            getState: () => ({ isGameOver: this.isGameOver, isBusy: this.isBusy, started: this.started }),
+            getState: () => ({ isGameOver: this.isGameOver, isBusy: this.isBusy, started: this.started, isPaused: this.isPaused }),
             setBusy: (v) => (this.isBusy = v),
             getScore: () => this.score,
             setScore: (v) => { this.score = v; },
@@ -127,17 +134,55 @@ export class Game {
 
         this.ui.bindShopOpen(() => {
             if (!this.isGameOver) return;
+            if (this.isRankingOpen) return;
             this.isShopOpen = true;
+            this.ui.setRankingButtonEnabled(false);
             this.ui.openShopOverlay();
         });
 
         this.ui.bindShopClose(() => {
             this.isShopOpen = false;
             this.ui.closeShopOverlay();
+            if (!this.started || this.isGameOver) this.ui.setRankingButtonEnabled(true);
+        });
+
+        this.ui.bindPauseToggle(async () => {
+            if (!this.started || this.isGameOver || this.isPreparingStart || this._pauseTransition) return;
+            if (this.isPaused) await this.resumeGame();
+            else this.pauseGame();
+        });
+
+        this.ui.bindPauseResume(async () => {
+            if (!this.isPaused || this._pauseTransition) return;
+            await this.resumeGame();
+        });
+
+        this.ui.bindRankingOpen(() => {
+            if (this.started && !this.isGameOver) return;
+            if (this.isShopOpen) return;
+            this.isRankingOpen = true;
+            this.ui.setShopOpenButtonEnabled(false);
+            this.ui.showRankingOverlay(this.rankings, {
+                tab: "score",
+                highlightId: this._latestRankEntryId
+            });
+            this._hasNewRank = false;
+            this.ui.setRankingNewBadge(false);
+        });
+
+        this.ui.bindRankingClose(() => {
+            this.isRankingOpen = false;
+            this.ui.hideRankingOverlay();
+            if (!this.started || this.isGameOver) this.ui.setShopOpenButtonEnabled(true);
         });
 
         this.ui.closeShopOverlay();
         this.ui.hideShopOpenButton();
+        this.ui.hidePauseButton();
+        this.ui.hidePauseOverlay();
+        this.ui.hideRankingOverlay();
+        this.ui.setRankingButtonEnabled(true);
+        this.ui.setShopOpenButtonEnabled(true);
 
         // ======================
         // 🔊 Sound Controls
@@ -181,6 +226,9 @@ export class Game {
         this.loadProgress();
         this.syncStats();
         this.updateHUD();
+        this.ui.showRankingButton();
+        this.ui.setRankingButtonEnabled(true);
+        this.ui.setRankingNewBadge(false);
         
         // constructor 안, 상태값 추가
         this.lastGainedPoints = 0;
@@ -204,6 +252,9 @@ export class Game {
         this.timerCtrl.stop();
         stopBgm(false);
         this.ui.stopComboTimer();
+        this.isPaused = false;
+        this._pauseTransition = false;
+        this.isRankingOpen = false;
 
         this.started = false;
         this.isGameOver = false;
@@ -218,6 +269,9 @@ export class Game {
         this.bestScore = 0;
         this.bestCombo = 0;
         this.lastGainedPoints = 0;
+        this.rankings = { scoreTop10: [], comboTop10: [] };
+        this._latestRankEntryId = null;
+        this._hasNewRank = false;
 
         this.score = 0;
         this.stage = 1;
@@ -227,6 +281,14 @@ export class Game {
         this.ui.hideGameOver();
         this.ui.closeShopOverlay();
         this.ui.hideShopOpenButton();
+        this.ui.hidePauseOverlay();
+        this.ui.hidePauseButton();
+        this.ui.setPauseButtonPaused(false);
+        this.ui.hideRankingOverlay();
+        this.ui.showRankingButton();
+        this.ui.setRankingButtonEnabled(true);
+        this.ui.setShopOpenButtonEnabled(true);
+        this.ui.setRankingNewBadge(false);
 
         const gameWrap = document.getElementById("gameWrap");
         if (gameWrap) {
@@ -272,6 +334,24 @@ export class Game {
 
         const maxCombo = Number(save.maxCombo ?? 0);
         this.bestCombo = Number.isFinite(maxCombo) ? Math.max(0, Math.floor(maxCombo)) : 0;
+
+        const srcRank = save.rankings || {};
+        const normalizeList = (arr) => {
+            if (!Array.isArray(arr)) return [];
+            return arr
+                .map((x, idx) => ({
+                    id: String(x?.id ?? `${Date.now()}_${idx}`),
+                    score: Math.max(0, Math.floor(Number(x?.score ?? 0) || 0)),
+                    combo: Math.max(0, Math.floor(Number(x?.combo ?? 0) || 0)),
+                    playedAt: Number(x?.playedAt ?? Date.now()) || Date.now()
+                }))
+                .slice(0, 10);
+        };
+
+        this.rankings = {
+            scoreTop10: normalizeList(srcRank.scoreTop10),
+            comboTop10: normalizeList(srcRank.comboTop10)
+        };
     }
 
     saveProgress() {
@@ -280,7 +360,8 @@ export class Game {
                 points: this.upgrades.points,
                 levels: { ...this.upgrades.levels },
                 bestScore: Math.max(0, this.bestScore || 0),
-                maxCombo: Math.max(0, this.bestCombo || 0)
+                maxCombo: Math.max(0, this.bestCombo || 0),
+                rankings: this.rankings
             };
             localStorage.setItem(this._saveKey, JSON.stringify(payload));
         } catch (e) {
@@ -326,6 +407,10 @@ export class Game {
             this.isShopOpen = false;
             this.ui.closeShopOverlay();
             this.ui.hideShopOpenButton();
+            this.ui.hideRankingOverlay();
+            this.ui.hideRankingButton();
+            this.isRankingOpen = false;
+            this.ui.setRankingNewBadge(false);
 
             this.ui.hideGameOver();
             document.getElementById("gameWrap").classList.remove("gameover");
@@ -347,10 +432,14 @@ export class Game {
             await fillPromise;
 
             playBgm();
+            fadeBgmTo(1, 200);
             this.started = true;
+            this.isPaused = false;
             document.getElementById("gameWrap").classList.add("playing");
             this.startTimer();
             this.ui.setRestartLabel("");
+            this.ui.setPauseButtonPaused(false);
+            this.ui.showPauseButton();
         } finally {
             this.isPreparingStart = false;
         }
@@ -367,6 +456,10 @@ export class Game {
             this.isShopOpen = false;
             this.ui.closeShopOverlay();
             this.ui.hideShopOpenButton();
+            this.ui.hideRankingOverlay();
+            this.ui.hideRankingButton();
+            this.isRankingOpen = false;
+            this.ui.setRankingNewBadge(false);
 
             this.ui.hideGameOver();
 
@@ -396,13 +489,44 @@ export class Game {
             await fillPromise;
 
             playBgm();
+            fadeBgmTo(1, 200);
             this.started = true;
+            this.isPaused = false;
             this.startTimer();
             this.ui.setRestartLabel("");
             document.getElementById("gameWrap").classList.add("playing");
+            this.ui.setPauseButtonPaused(false);
+            this.ui.showPauseButton();
         } finally {
             this.isPreparingStart = false;
         }
+    }
+
+    pauseGame() {
+        if (this.isPaused) return;
+        this.isPaused = true;
+        this.timerCtrl.pause();
+        this.ui.setPauseButtonPaused(true);
+        this.ui.showPauseOverlay();
+        fadeBgmTo(0.25, 280);
+    }
+
+    async resumeGame() {
+        if (!this.isPaused) return;
+        this._pauseTransition = true;
+        this.ui.setPauseButtonPaused(true);
+        fadeBgmTo(1, 380);
+
+        for (let sec = 3; sec >= 1; sec--) {
+            this.ui.showPauseResumeCountdown(sec);
+            await sleep(320);
+        }
+
+        this.ui.hidePauseOverlay();
+        this.ui.setPauseButtonPaused(false);
+        this.isPaused = false;
+        this.timerCtrl.resume();
+        this._pauseTransition = false;
     }
 
     initBoard() {
@@ -411,7 +535,12 @@ export class Game {
 
     async playGameOverSequence() {
         this.isGameOver = true;
+        this.isPaused = false;
         this.ui.hideCountdown();
+        this.ui.hidePauseOverlay();
+        this.ui.hidePauseButton();
+        this.ui.setPauseButtonPaused(false);
+        this.isRankingOpen = false;
 
         stopBgm(true);
 
@@ -464,6 +593,10 @@ export class Game {
         const maxCombo = this.boardCtrl.getMaxCombo ? this.boardCtrl.getMaxCombo() : 0;
         this.bestCombo = Math.max(this.bestCombo || 0, maxCombo || 0);
 
+        const rankResult = this._pushRankings(this.score, maxCombo);
+        this._latestRankEntryId = rankResult.entryId;
+        this._hasNewRank = rankResult.isNew;
+
         document.getElementById("gameWrap").classList.remove("playing");
         document.getElementById("gameWrap").classList.add("gameover");
 
@@ -482,6 +615,10 @@ export class Game {
         this.ui.refreshShop(this.upgrades);
         this.ui.showGameOver(this.score, gainedPoints, maxCombo);
         this.ui.showShopOpenButton(this.lastGainedPoints);
+        this.ui.showRankingButton();
+        this.ui.setRankingButtonEnabled(true);
+        this.ui.setShopOpenButtonEnabled(true);
+        this.ui.setRankingNewBadge(this._hasNewRank);
         this.ui.setRestartLabel("다시 시작");
 
         this.saveProgress();
@@ -521,6 +658,7 @@ export class Game {
 
     startTimer() {
         this.isGameOver = false;
+        this.isPaused = false;
 
         this.boardEl.classList.remove("shake");
         this.ui.hideCountdown();
@@ -530,5 +668,27 @@ export class Game {
 
         this.timerCtrl.setDuration(finalTime);
         this.timerCtrl.start();
+    }
+
+    _pushRankings(score, combo) {
+        const entry = {
+            id: `${Date.now()}_${Math.floor(Math.random() * 100000)}`,
+            score: Math.max(0, Math.floor(Number(score) || 0)),
+            combo: Math.max(0, Math.floor(Number(combo) || 0)),
+            playedAt: Date.now()
+        };
+
+        const sortScore = (a, b) => (b.score - a.score) || (b.playedAt - a.playedAt);
+        const sortCombo = (a, b) => (b.combo - a.combo) || (b.playedAt - a.playedAt);
+
+        const scoreTop10 = [...(this.rankings.scoreTop10 || []), entry].sort(sortScore).slice(0, 10);
+        const comboTop10 = [...(this.rankings.comboTop10 || []), entry].sort(sortCombo).slice(0, 10);
+
+        this.rankings = { scoreTop10, comboTop10 };
+
+        const inScoreTop = scoreTop10.some(x => x.id === entry.id);
+        const inComboTop = comboTop10.some(x => x.id === entry.id);
+
+        return { entryId: entry.id, isNew: inScoreTop || inComboTop };
     }
 }

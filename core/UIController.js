@@ -17,6 +17,17 @@ export class UIController {
         this.shopCloseBtn = document.getElementById("shopCloseBtn");
         this.shopOverlayEl = document.getElementById("shopOverlay");
         this.startGuideEl = document.getElementById("startGuideOverlay");
+        this.pauseBtn = document.getElementById("pauseBtn");
+        this.pauseOverlayEl = document.getElementById("pauseOverlay");
+        this.pauseResumeBtn = document.getElementById("pauseResumeBtn");
+        this.pauseCountdownEl = document.getElementById("pauseCountdown");
+        this.rankingBtn = document.getElementById("rankingBtn");
+        this.rankingNewBadge = document.getElementById("rankingNewBadge");
+        this.rankingOverlayEl = document.getElementById("rankingOverlay");
+        this.rankingListEl = document.getElementById("rankingList");
+        this.rankTabScoreBtn = document.getElementById("rankTabScore");
+        this.rankTabComboBtn = document.getElementById("rankTabCombo");
+        this.rankingCloseBtn = document.getElementById("rankingCloseBtn");
 
         // ✅ 콤보 유지시간 바
         this.comboTimerWrapEl = document.getElementById("comboTimerWrap");
@@ -28,6 +39,147 @@ export class UIController {
         this._stageBannerTimer = null;
         this._startGuideFadeTimer = null;
         this._titleFxTimers = [];
+        this._rankingData = { scoreTop10: [], comboTop10: [] };
+        this._rankingTab = "score";
+        this._rankingHighlightId = null;
+
+        if (this.rankTabScoreBtn) {
+            this.rankTabScoreBtn.onclick = () => this.setRankingTab("score");
+        }
+        if (this.rankTabComboBtn) {
+            this.rankTabComboBtn.onclick = () => this.setRankingTab("combo");
+        }
+    }
+
+    bindPauseToggle(handler) {
+        if (!this.pauseBtn) return;
+        this.pauseBtn.onclick = handler;
+    }
+
+    bindPauseResume(handler) {
+        if (!this.pauseResumeBtn) return;
+        this.pauseResumeBtn.onclick = handler;
+    }
+
+    bindRankingOpen(handler) {
+        if (!this.rankingBtn) return;
+        this.rankingBtn.onclick = handler;
+    }
+
+    bindRankingClose(handler) {
+        if (!this.rankingCloseBtn) return;
+        this.rankingCloseBtn.onclick = handler;
+    }
+
+    showPauseButton() {
+        if (!this.pauseBtn) return;
+        this.pauseBtn.classList.add("show");
+    }
+
+    hidePauseButton() {
+        if (!this.pauseBtn) return;
+        this.pauseBtn.classList.remove("show");
+    }
+
+    setPauseButtonPaused(paused) {
+        if (!this.pauseBtn) return;
+        this.pauseBtn.textContent = paused ? "▶" : "⏸";
+    }
+
+    showPauseOverlay() {
+        if (!this.pauseOverlayEl) return;
+        this.pauseOverlayEl.classList.add("show");
+        if (this.pauseCountdownEl) this.pauseCountdownEl.textContent = "";
+        if (this.pauseResumeBtn) this.pauseResumeBtn.style.display = "inline-block";
+    }
+
+    showPauseResumeCountdown(sec) {
+        if (!this.pauseOverlayEl) return;
+        this.pauseOverlayEl.classList.add("show");
+        if (this.pauseResumeBtn) this.pauseResumeBtn.style.display = "none";
+        if (this.pauseCountdownEl) this.pauseCountdownEl.textContent = String(sec);
+    }
+
+    hidePauseOverlay() {
+        if (!this.pauseOverlayEl) return;
+        this.pauseOverlayEl.classList.remove("show");
+        if (this.pauseCountdownEl) this.pauseCountdownEl.textContent = "";
+        if (this.pauseResumeBtn) this.pauseResumeBtn.style.display = "inline-block";
+    }
+
+    showRankingButton() {
+        if (!this.rankingBtn) return;
+        this.rankingBtn.classList.add("show");
+    }
+
+    hideRankingButton() {
+        if (!this.rankingBtn) return;
+        this.rankingBtn.classList.remove("show");
+    }
+
+    setRankingButtonEnabled(enabled) {
+        if (!this.rankingBtn) return;
+        this.rankingBtn.classList.toggle("disabled", !enabled);
+    }
+
+    setShopOpenButtonEnabled(enabled) {
+        if (!this.shopOpenBtn) return;
+        this.shopOpenBtn.style.pointerEvents = enabled ? "auto" : "none";
+        this.shopOpenBtn.style.opacity = enabled ? "1" : "0.45";
+    }
+
+    setRankingNewBadge(visible) {
+        if (!this.rankingNewBadge) return;
+        this.rankingNewBadge.classList.toggle("show", !!visible);
+    }
+
+    setRankingTab(tab) {
+        this._rankingTab = tab === "combo" ? "combo" : "score";
+        if (this.rankTabScoreBtn) this.rankTabScoreBtn.classList.toggle("active", this._rankingTab === "score");
+        if (this.rankTabComboBtn) this.rankTabComboBtn.classList.toggle("active", this._rankingTab === "combo");
+        this.renderRankingList();
+    }
+
+    showRankingOverlay(rankingData, { tab = "score", highlightId = null } = {}) {
+        if (rankingData) this._rankingData = rankingData;
+        this._rankingHighlightId = highlightId;
+        this.setRankingTab(tab);
+        if (!this.rankingOverlayEl) return;
+        this.rankingOverlayEl.classList.add("show");
+    }
+
+    hideRankingOverlay() {
+        if (!this.rankingOverlayEl) return;
+        this.rankingOverlayEl.classList.remove("show");
+    }
+
+    renderRankingList() {
+        if (!this.rankingListEl) return;
+        const list = this._rankingTab === "combo"
+            ? (this._rankingData?.comboTop10 || [])
+            : (this._rankingData?.scoreTop10 || []);
+
+        if (!Array.isArray(list) || list.length === 0) {
+            this.rankingListEl.innerHTML = `<div class="rank-empty">기록이 아직 없습니다</div>`;
+            return;
+        }
+
+        const html = list.map((item, i) => {
+            const value = this._rankingTab === "combo"
+                ? Number(item.combo || 0).toLocaleString("ko-KR")
+                : Number(item.score || 0).toLocaleString("ko-KR");
+            const dt = item.playedAt ? new Date(item.playedAt).toLocaleString("ko-KR") : "-";
+            const isCurrent = this._rankingHighlightId && item.id === this._rankingHighlightId;
+            return `
+                <div class="rank-row ${isCurrent ? "current" : ""}">
+                    <div>${i + 1}위</div>
+                    <div>${dt}</div>
+                    <div class="rank-value">${value}</div>
+                </div>
+            `;
+        }).join("");
+
+        this.rankingListEl.innerHTML = html;
     }
 
     _setGuideTitle(line1Text, line2Text) {

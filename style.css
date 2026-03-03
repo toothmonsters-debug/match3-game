@@ -4,6 +4,166 @@
     box-sizing: border-box;
 }
 
+#pauseBtn {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    z-index: 13;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(40, 48, 88, 0.9);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+    z-index: 1002;
+}
+
+#pauseBtn.show {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#rankingBtn {
+    margin-top: 5px;
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(180deg, #4b5ad4, #2e3791);
+    cursor: pointer;
+    position: relative;
+    z-index: 1100;
+    display: none;
+}
+
+#rankingBtn.show {
+    display: block;
+}
+
+#rankingBtn.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+#rankingNewBadge {
+    position: absolute;
+    top: -6px;
+    left: 8px;
+    background: #ff3b30;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 999px;
+    display: none;
+}
+
+#rankingNewBadge.show {
+    display: inline-block;
+}
+
+#rankingOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1202;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.48);
+}
+
+#rankingOverlay.show {
+    display: flex;
+}
+
+#rankingOverlay .ranking-panel {
+    width: min(94%, 420px);
+    max-height: 86%;
+    background: linear-gradient(180deg, #191b34, #111425);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 10px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 8px;
+}
+
+#rankingOverlay .ranking-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+#rankingOverlay .ranking-tabs button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 0;
+    cursor: pointer;
+    font-weight: 800;
+    background: #2a2e52;
+    color: #dfe7ff;
+}
+
+#rankingOverlay .ranking-tabs button.active {
+    background: #5a6cff;
+    color: #fff;
+}
+
+#rankingList {
+    min-height: 180px;
+    max-height: 360px;
+    overflow: auto;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+}
+
+.rank-row {
+    display: grid;
+    grid-template-columns: 42px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 8px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    font-size: 13px;
+}
+
+.rank-row.current {
+    font-weight: 900;
+    outline: 2px solid rgba(255, 209, 102, 0.85);
+    background: rgba(255, 209, 102, 0.16);
+}
+
+.rank-row .rank-value {
+    font-weight: 900;
+    color: #ffd166;
+}
+
+.rank-empty {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    padding: 24px 0;
+}
+
+#rankingCloseBtn {
+    border: none;
+    border-radius: 9px;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    background: #2d324f;
+    color: #fff;
+}
+
 .fx-glow,
 .fx-wave,
 .fx-shard {
@@ -367,6 +527,47 @@ body {
 
 #gameOverOverlay.show {
     opacity: 1;
+}
+
+#pauseOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.45);
+}
+
+#pauseOverlay.show {
+    display: flex;
+}
+
+#pauseOverlay .pause-title {
+    font-size: 42px;
+    font-weight: 900;
+    color: #ffd166;
+    text-shadow: 0 0 8px #000;
+}
+
+#pauseOverlay .pause-countdown {
+    min-height: 30px;
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+}
+
+#pauseResumeBtn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(180deg, #7bdff2, #3ca3ba);
+    color: #05242b;
+    cursor: pointer;
 }
 
 #gameOverOverlay .go-title {
