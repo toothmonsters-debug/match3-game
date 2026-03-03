@@ -36,6 +36,6 @@ export class GameConfig {
     getCrossPerLevel() { return 300; }
 
     // 시간 관련
-    getTimeBase() { return 6; }
+    getTimeBase() { return 60; }
     getTimePerLevel() { return 2; }
 }
