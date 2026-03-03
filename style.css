@@ -173,7 +173,7 @@ body {
     width: 0%;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, #ffffff 0%, #ffd60a 55%, #ff3b30 100%);
+    background: linear-gradient(90deg,#29aaff);
     transform-origin: left center;
 }
 
@@ -349,26 +349,27 @@ body {
 #shopOpenBtn {
     position: absolute;
     left: 50%;
-    top: 66%;
+    top: 62%;
     transform: translateX(-50%);
     z-index: 35;
     display: none;
-    padding: 10px 14px;
+    padding: 11px 16px;
     border: none;
-    border-radius: 10px;
+    border-radius: 13px;
     font-weight: 800;
     cursor: pointer;
     background: linear-gradient(180deg, #ffd166, #d9a62f);
     color: #2b1d00;
-    box-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+    box-shadow: 0 0 11px rgba(255, 209, 102, 0.5);
     line-height: 1.15;
     text-align: center;
+    font-size: 22px;
 }
 
 #shopOpenBtn small {
     display: block;
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     color: #3a2a00;
 }
