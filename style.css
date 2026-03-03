@@ -930,13 +930,13 @@ body.board-drag-lock {
 /* 99콤보가: 왼쪽이 살짝 올라가게 (약 5도) */
 #startGuideOverlay .guide-title .line1 {
     font-size: clamp(40px, 6.2vw, 64px);
-    transform: rotate(5deg) translateX(-8px);
+    transform: rotate(5deg) translateX(-45px);
 }
 
 /* 하고싶어!!: 왼쪽이 내려가게 (약 15도), 더 오른쪽 배치 */
     #startGuideOverlay .guide-title .line2 {
         font-size: clamp(40px, 6.8vw, 64px);
-        margin-top: 4px;
+        margin-top: 8px;
         transform: rotate(-10deg) translateX(85px);
         position: absolute;
         top: 170%;
