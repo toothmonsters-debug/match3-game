@@ -77,11 +77,11 @@ export class UIController {
             line1Text = `<span class="num99">${c}</span>콤보를`;
             line2Text = "해버렸다!!";
         } else if (c <= 130) {
-            line1Text = `<span class="num99">${c}</span>콤보쯤은`;
-            line2Text = "너무쉽지!!";
+            line1Text = `<span class="num99">${c}</span>콤보라니`;
+            line2Text = "쥑이네!!";
         } else if (c <= 150) {
             line1Text = `<span class="num99">${c}</span>콤보..`;
-            line2Text = "하하!!";
+            line2Text = "하하,쉽네!!";
         } else if (c <= 175) {
             line1Text = `<span class="num99">${c}</span>콤보는`;
             line2Text = "기본이랄까?";
