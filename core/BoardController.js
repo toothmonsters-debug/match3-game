@@ -61,26 +61,44 @@ export class BoardController {
         this.renderer.render(board);
     }
 
-    showFloat(r, c, text) {
+    // showFloat 함수 교체
+    showFloat(r, c, text, opts = {}) {
         if (this.boardEl.querySelectorAll(".floatText").length > 80) return;
 
+        const {
+            color = null,
+            className = "",
+            zIndex = 60,
+            yOffset = 0
+        } = opts;
+
         const d = document.createElement("div");
-        d.className = "floatText";
+        d.className = `floatText ${className}`.trim();
         d.textContent = text;
         d.style.left = (c * 50 + 10) + "px";
-        d.style.top = (r * 50 + 10) + "px";
-        d.style.transform = "translateY(0px)";
+        d.style.top = (r * 50 + 10 + yOffset) + "px";
+        d.style.transform = "translateY(0px) scale(1.25)";
         d.style.opacity = "1";
+        d.style.zIndex = String(zIndex);
+        d.style.transition = "transform 0.15s ease, opacity 0.7s ease";
+        if (color) d.style.color = color;
 
         this.boardEl.appendChild(d);
         d.getBoundingClientRect();
 
-        requestAnimationFrame(() => {
-            d.style.transform = "translateY(-30px)";
-            d.style.opacity = "0";
-        });
+        // 0.15초 후 원래 크기
+        setTimeout(() => {
+            d.style.transform = "translateY(0px) scale(1)";
+        }, 100);
 
-        setTimeout(() => d.remove(), 800);
+        // 이후 기존처럼 위로 뜨며 사라짐
+        setTimeout(() => {
+            d.style.transition = "transform 0.7s ease, opacity 0.7s ease";
+            d.style.transform = "translateY(-34px) scale(1)";
+            d.style.opacity = "0";
+        }, 300);
+
+        setTimeout(() => d.remove(), 900);
     }
 
     /* ================= Core Logic ================= */
@@ -139,8 +157,6 @@ export class BoardController {
     async removeCells(initial, matchSize = 3, scoreRef, { isSpecialActivation = false, activationTriggers = [], triggerBomb = 0, triggerCross = 0 } = {}) {
         const board = this.boardModel.get();
 
-        // 🔒 발동 트리거 기준 카운트
-        // 전달된 triggerBomb/triggerCross 우선 사용. 전달되지 않았으면 activationTriggers 기준으로 현재 보드에서 판별(하위 호환).
         if (isSpecialActivation && (triggerBomb === 0 && triggerCross === 0)) {
             triggerBomb = 0;
             triggerCross = 0;
@@ -155,34 +171,66 @@ export class BoardController {
         const cells = this.specialResolver.expand(board, initial);
         if (cells.length === 0) return 0;
 
-        console.log(
-            "[removeCells] isSpecialActivation:", isSpecialActivation,
-            "triggerBomb:", triggerBomb,
-            "triggerCross:", triggerCross,
-            "expandedCells:", cells.length
-        );
+        const expandedSet = new Set(cells.map(([r, c]) => `${r},${c}`));
+        const activationSet = new Set((activationTriggers || []).map(([r, c]) => `${r},${c}`));
 
-        // 사운드
+        // ✅ "연계 특수" (직접 발동 트리거 제외)
+        const chainedSpecialSet = new Set();
+        for (const [r, c] of cells) {
+            const k = `${r},${c}`;
+            const cell = board[r][c];
+            if (!cell) continue;
+            if ((cell.special === "bomb" || cell.special === "cross") && !activationSet.has(k)) {
+                chainedSpecialSet.add(k);
+            }
+        }
+
+        // ✅ 연계 특수로 인해 터진 "일반블럭"만 x2 대상
+        const doubledNormalSet = new Set();
+        const q = [...chainedSpecialSet].map(s => s.split(",").map(Number));
+        const visitedSpecial = new Set(chainedSpecialSet);
+
+        while (q.length) {
+            const [sr, sc] = q.shift();
+            const srcCell = board[sr][sc];
+            if (!srcCell) continue;
+
+            const affected =
+                srcCell.special === "bomb"
+                    ? this.specialResolver.triggerBomb(board, sr, sc)
+                    : this.specialResolver.triggerCross(board, sr, sc);
+
+            for (const [ar, ac] of affected) {
+                const ak = `${ar},${ac}`;
+                if (!expandedSet.has(ak)) continue;
+
+                const target = board[ar][ac];
+                if (!target) continue;
+
+                const isSpecial = target.special === "bomb" || target.special === "cross";
+                if (isSpecial) {
+                    if (!activationSet.has(ak) && !visitedSpecial.has(ak)) {
+                        visitedSpecial.add(ak);
+                        q.push([ar, ac]);
+                    }
+                } else {
+                    doubledNormalSet.add(ak); // ✅ 일반블럭만 x2
+                }
+            }
+        }
+
         if (isSpecialActivation) playSfx("bomb");
         else playSfx("match");
 
-        // 제거 + 연출
         for (const [r, c] of cells) {
             if (!board[r][c]) continue;
             this.renderer.playExplode(r, c);
             board[r][c] = null;
         }
 
-        // -------------------------------
-        // ✅ 블럭 1개당 점수 계산 (새 규칙 적용)
-        // -------------------------------
         const removedTotal = cells.length;
-
-        // 핵심 변경: 매치 승수는 "실제 매치 크기(matchSize)"를 기준으로 계산해야 함.
-        // 기존은 removedTotal을 사용했으나 특수 생성으로 인해 removedTotal이 줄어드는 경우가 있어 잘못된 결과가 발생.
         const perBlockMatch = this.scoreSystem.calcPerBlockScore({ removedTotal: matchSize, combo: 0 });
 
-        // 2) 특수 보너스 (블럭 1개당) — 전달받은 trigger counts 사용
         let perBlockSpecial = 0;
         if (isSpecialActivation && (triggerBomb + triggerCross) > 0) {
             perBlockSpecial = this.scoreSystem.calcSpecialBonus({
@@ -191,32 +239,34 @@ export class BoardController {
             });
         }
 
-        // 3) 최종 블럭 1개당 점수 = 매치점수 + 특수
         const perBlockFinal = perBlockMatch + perBlockSpecial;
-
-        console.log(
-            "[SCORE]",
-            "perBlockMatch:", perBlockMatch,
-            "perBlockSpecial:", perBlockSpecial,
-            "perBlockFinal:", perBlockFinal,
-            "removedTotal:", removedTotal
-        );
-
-        // 플로팅
-        for (const [r, c] of cells) {
-            this.showFloat(r, c, `+${perBlockFinal}`);
-        }
-
-        // 기본 획득 점수
         const baseGain = perBlockFinal * removedTotal;
 
-        // 콤보
+        // ✅ 연계 일반블럭 x2 추가점수
+        const chainDoubleBonus = perBlockFinal * doubledNormalSet.size;
+
+        // removeCells 내부 플로팅 표시 부분 교체
+        for (const [r, c] of cells) {
+            const k = `${r},${c}`;
+            if (doubledNormalSet.has(k)) {
+                this.showFloat(r, c, `+${perBlockFinal} x2`, {
+                    color: "#7bdff2",
+                    className: "floatText--x2",
+                    zIndex: 140,
+                    yOffset: -10
+                });
+            } else {
+                this.showFloat(r, c, `+${perBlockFinal}`, {
+                    zIndex: 80
+                });
+            }
+        }
+
         this._bumpCombo();
         const comboBonus = this.combo > 0 ? this.scoreSystem.calcComboBonus(this.combo) : 0;
 
-        let gain = baseGain + comboBonus;
+        const gain = baseGain + chainDoubleBonus + comboBonus;
 
-        // 점수 반영
         scoreRef.value += gain;
         if (this.onScoreChange) this.onScoreChange(gain, scoreRef.value);
 

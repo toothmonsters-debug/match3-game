@@ -581,6 +581,15 @@ body {
     text-shadow: 0 0 4px #000, 0 0 8px #000;
     pointer-events: none;
     transition: all 1s ease;
+    z-index: 60;
+}
+
+.floatText--x2 {
+    font-size: 28px;
+    font-weight: 900;
+    text-shadow: 0 0 6px #000, 0 0 14px rgba(123, 223, 242, 0.9);
+    letter-spacing: 0.5px;
+    filter: saturate(1.2);
 }
 
 #board.shake {

@@ -5,7 +5,6 @@ import { playSfx } from "./audio/Sfx.js";
 document.addEventListener("mousedown", () => {
    // playSfx("match");   // 아무 짧은 효과음 하나
 }, { once: true });
-
 const game = new Game();
 window.game = game;
 
