@@ -24,6 +24,7 @@ export class UIController {
         this.rankingBtn = document.getElementById("rankingBtn");
         this.rankingNewBadge = document.getElementById("rankingNewBadge");
         this.rankingOverlayEl = document.getElementById("rankingOverlay");
+        this.rankingCurrentInfoEl = document.getElementById("rankingCurrentInfo");
         this.rankingListEl = document.getElementById("rankingList");
         this.rankTabScoreBtn = document.getElementById("rankTabScore");
         this.rankTabComboBtn = document.getElementById("rankTabCombo");
@@ -42,6 +43,8 @@ export class UIController {
         this._rankingData = { scoreTop10: [], comboTop10: [] };
         this._rankingTab = "score";
         this._rankingHighlightId = null;
+        this._rankingCurrentScore = 0;
+        this._rankingCurrentCombo = 0;
 
         if (this.rankTabScoreBtn) {
             this.rankTabScoreBtn.onclick = () => this.setRankingTab("score");
@@ -140,9 +143,11 @@ export class UIController {
         this.renderRankingList();
     }
 
-    showRankingOverlay(rankingData, { tab = "score", highlightId = null } = {}) {
+    showRankingOverlay(rankingData, { tab = "score", highlightId = null, currentScore = 0, currentCombo = 0 } = {}) {
         if (rankingData) this._rankingData = rankingData;
         this._rankingHighlightId = highlightId;
+        this._rankingCurrentScore = Math.max(0, Number(currentScore) || 0);
+        this._rankingCurrentCombo = Math.max(0, Number(currentCombo) || 0);
         this.setRankingTab(tab);
         if (!this.rankingOverlayEl) return;
         this.rankingOverlayEl.classList.add("show");
@@ -154,6 +159,10 @@ export class UIController {
     }
 
     renderRankingList() {
+        if (this.rankingCurrentInfoEl) {
+            this.rankingCurrentInfoEl.innerHTML = `현재점수 : <span class="val">${this._formatComma(this._rankingCurrentScore)}</span> · 현재콤보 : <span class="val">${this._formatComma(this._rankingCurrentCombo)}</span>`;
+        }
+
         if (!this.rankingListEl) return;
         const list = this._rankingTab === "combo"
             ? (this._rankingData?.comboTop10 || [])
@@ -164,16 +173,55 @@ export class UIController {
             return;
         }
 
+        const currentIndex = this._rankingHighlightId
+            ? list.findIndex(x => x.id === this._rankingHighlightId)
+            : -1;
+
+        let prevRankValue = null;
+        let prevDisplayRank = 0;
+
         const html = list.map((item, i) => {
             const value = this._rankingTab === "combo"
                 ? Number(item.combo || 0).toLocaleString("ko-KR")
                 : Number(item.score || 0).toLocaleString("ko-KR");
+            const rankValueNum = this._rankingTab === "combo"
+                ? Number(item.combo || 0)
+                : Number(item.score || 0);
+
+            let displayRank = i + 1;
+            if (i > 0 && rankValueNum === prevRankValue) {
+                displayRank = prevDisplayRank;
+            }
+
+            prevRankValue = rankValueNum;
+            prevDisplayRank = displayRank;
+
             const dt = item.playedAt ? new Date(item.playedAt).toLocaleString("ko-KR") : "-";
             const isCurrent = this._rankingHighlightId && item.id === this._rankingHighlightId;
+            const topClass = i === 0 ? "top1" : i === 1 ? "top2" : i === 2 ? "top3" : "";
+            let marker = "";
+            let markerClass = "";
+
+            if (currentIndex >= 0) {
+                if (isCurrent) {
+                    marker = "✔";
+                    markerClass = "current";
+                } else if (i < currentIndex) {
+                    marker = "-";
+                    markerClass = "upper";
+                } else {
+                    marker = "▼";
+                    markerClass = "lower";
+                }
+            }
+
             return `
-                <div class="rank-row ${isCurrent ? "current" : ""}">
-                    <div>${i + 1}위</div>
-                    <div>${dt}</div>
+                <div class="rank-row ${topClass} ${isCurrent ? "current" : ""}">
+                    <div>${displayRank}위</div>
+                    <div>
+                        <span>${dt}</span>
+                        ${marker ? `<span class="rank-marker ${markerClass}">${marker}</span>` : ""}
+                    </div>
                     <div class="rank-value">${value}</div>
                 </div>
             `;

@@ -37,7 +37,7 @@ export class GameConfig {
 
 
     // 시간 관련
-    getTimeBase() { return 60; }
+    getTimeBase() { return 6; }
     getTimePerLevel() { return 2; }
 
     // ✅ 콤보 유지시간 업그레이드용

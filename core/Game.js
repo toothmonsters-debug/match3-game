@@ -162,9 +162,12 @@ export class Game {
             if (this.isShopOpen) return;
             this.isRankingOpen = true;
             this.ui.setShopOpenButtonEnabled(false);
+            const currentCombo = this.isGameOver && this.boardCtrl.getMaxCombo ? this.boardCtrl.getMaxCombo() : 0;
             this.ui.showRankingOverlay(this.rankings, {
                 tab: "score",
-                highlightId: this._latestRankEntryId
+                highlightId: this._latestRankEntryId,
+                currentScore: this.score,
+                currentCombo
             });
             this._hasNewRank = false;
             this.ui.setRankingNewBadge(false);
